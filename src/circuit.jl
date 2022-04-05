@@ -70,6 +70,13 @@ Base.push!(x::QCircuit, s::Tuple{NTuple{N, Int}, <:AbstractMatrix}) where N = pu
 
 change_positions(x::QCircuit, m::AbstractDict) = QCircuit([change_positions(o, m) for o in x.operations])
 
+function nparameters(x::QCircuit)
+	n = 0
+	for o in x
+		n += nparameters(o)
+	end
+	return n
+end
 
 function parameters(x::QCircuit)
 	paras = Float64[]
@@ -111,6 +118,27 @@ function deactivate_parameters!(x::QCircuit)
 	end
 	return x
 end
+
+function reset_parameters!(x::QCircuit, p::Vector{<:Real})
+	(nparameters(x) == length(p)) || throw("number of parameters mismatch.")
+	pos = reset_parameters_util!(x, p, 0)
+	@assert pos == length(p)
+	return x
+end
+
+
+function reset_parameters_util!(x::QCircuit, p::Vector{<:Real}, pos::Int)
+	for o in x
+		pos = reset_parameters_util!(o, p, pos)
+	end
+	return pos
+end
+
+
+
+
+
+
 
 
 

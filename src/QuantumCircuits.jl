@@ -2,7 +2,7 @@ module QuantumCircuits
 
 # gates
 export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions
-export parameters, active_parameters, activate_parameter!, activate_parameters!, deactivate_parameter!, deactivate_parameters!
+export parameters, nparameters, active_parameters, activate_parameter!, activate_parameters!, deactivate_parameter!, deactivate_parameters!, reset_parameters!
 export QuantumGate, gate, XGate, YGate, ZGate, SGate, HGate, TGate, sqrtXGate, sqrtYGate
 export SWAPGate, iSWAPGate, CZGate, CNOTGate
 export TOFFOLIGate, FREDKINGate
