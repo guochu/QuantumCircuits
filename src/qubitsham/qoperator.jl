@@ -136,21 +136,6 @@ end
 _index_map(x::NTuple{N, Int}, mm::AbstractDict) where N = ntuple(j -> mm[x[j]], N)
 
 
-# _get_mat(x::BareTerm{AbstractMatrix}) = _kron_ops(reverse(oplist(x))) * value(coeff(x))
-# _get_mat(x::QubitsTerm) = _kron_ops(reverse(oplist(x))) * value(coeff(x))
-
-# function _get_mat(n::Int, x::BareBond{BareTerm{AbstractMatrix}})
-#     isempty(x) && error("bond is empty.")
-#     is_constant(x) || error("bond must be constant.")
-#     m = zeros(scalar_type(x), 2^n, 2^n)
-#     for item in x
-#         tmp = _kron_ops(reverse(oplist(item)))
-#         alpha = value(coeff(item))
-#         @. m += alpha * tmp
-#     end
-#     return m
-# end
-
 
 
 

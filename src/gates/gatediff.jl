@@ -12,28 +12,28 @@ end
 function differentiate(x::RxGate)
 	if is_parameters(x)[1]
 		mm = 0.5 .* Rx(parameters(x)[1] + pi)
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::RyGate)
 	if is_parameters(x)[1]
 		mm = 0.5 .* Ry(parameters(x)[1] + pi)
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::RzGate)
 	if is_parameters(x)[1]
 		mm = 0.5 .* Rz(parameters(x)[1] + pi)
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::PHASEGate)
 	if is_parameters(x)[1]
 		mm = phase_mat_diff(parameters(x)[1])
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
@@ -43,28 +43,28 @@ phase_mat_diff(phi::Real) = [0 0; 0. im*exp(im*phi)]
 function differentiate(x::CRxGate)
 	if is_parameters(x)[1]
 		mm = rkron(Gates.DOWN, 0.5 .* Rx(parameters(x)[1] + pi))
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::CRyGate)
 	if is_parameters(x)[1]
 		mm = rkron(Gates.DOWN, 0.5 .* Ry(parameters(x)[1] + pi))
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::CRzGate)
 	if is_parameters(x)[1]
 		mm = rkron(Gates.DOWN, 0.5 .* Rz(parameters(x)[1] + pi))
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
 function differentiate(x::CPHASEGate)
 	if is_parameters(x)[1]
 		mm = rkron(Gates.DOWN, phase_mat_diff(parameters(x)[1]))
-		return QuantumGate(positions(x), mm' * mat(x) )
+		return [QuantumGate(positions(x), mm' * mat(x) )]
 	end
 	return nothing
 end
