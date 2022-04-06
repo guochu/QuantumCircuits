@@ -8,16 +8,16 @@ struct QuantumGate{N, T<:Number} <: Gate{N}
 	ordered_pos::NTuple{N, Int}
 	ordered_data::Matrix{T}
 
-function QuantumGate(pos::NTuple{N, Int}, m::AbstractArray{T, K}) where {N, T, K}
-	(K == 2 * N) || throw(ArgumentError("input tensor rank mismatch with nqubits."))
-	all(size(m) .== 2) || throw(ArgumentError("size of each tensor dimension should be 2."))
-	ordered_pos, ordered_data = _get_norm_order(pos, m)
-	L = 2^N
-	new{N, T}(pos, convert(Matrix{T}, reshape(m, L, L)), ordered_pos, convert(Matrix{T}, reshape(ordered_data, L, L)))
-end
 
 end
-QuantumGate(pos::NTuple{N, Int}, m::AbstractMatrix) where N = QuantumGate(pos, reshape(m, ntuple(i=>2, 2*N)))
+function QuantumGate(pos::NTuple{N, Int}, mr::AbstractMatrix{T}) where {N, T}
+	m = reshape(mr, ntuple(i->2, 2*N))
+	ordered_pos, ordered_data = _get_norm_order(pos, m)
+	L = 2^N
+	QuantumGate(pos, convert(Matrix{T}, reshape(m, L, L)), ordered_pos, convert(Matrix{T}, reshape(ordered_data, L, L)))
+end
+
+
 QuantumGate(pos::Vector{Int}, m::AbstractMatrix) = QuantumGate(Tuple(pos), m)
 QuantumGate(pos::Int, m::AbstractMatrix) = QuantumGate((pos,), m)
 

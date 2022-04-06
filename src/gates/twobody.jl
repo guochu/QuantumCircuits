@@ -67,6 +67,18 @@ change_positions(x::CNOTGate, m::AbstractDict) = CNOTGate(ntuple(i->m[x.pos[i]],
 Base.adjoint(x::CNOTGate) = x
 
 
+# control gate
+struct CONTROLGate{M<:AbstractMatrix} <: Gate{2}
+	pos::Tuple{Int, Int}
+	target::M
+end
+CONTROLGate(a::Int, b::Int, target::AbstractMatrix) = CONTROLGate((a, b), target)
+CONTROLGate(m::AbstractMatrix; control::Int, target::Int) = CONTROLGate(control, target, m)
+mat(x::CONTROLGate) = CONTROL(x.target)
+
+change_positions(x::CONTROLGate, m::AbstractDict) = CONTROLGate(ntuple(i->m[x.pos[i]], 2), x.target)
+
+
 # parameteric two body gates
 struct CRxGate <:ParametricGate{2}
 	pos::Tuple{Int, Int}
@@ -128,17 +140,14 @@ struct FSIMGate <: ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-function FSIMGate(key::Tuple{Int, Int}, p::Vector{<:Real}; isparas::Bool=[true for j in p])
+function FSIMGate(key::Tuple{Int, Int}, p::Vector{<:Real}; isparas::Vector{Bool}=[true for j in p])
 	(length(p) == 5) || throw(ArgumentError("5 parameters expected."))
 	return FSIMGate(key, convert(Vector{Float64}, p) , isparas)
 end 
-FSIMGate(c::Int, t::Int, p::Vector{<:Real}; isparas::Bool=[true for j in p]) = FSIMGate((c, t), p, isparas=isparas)
-FSIMGate(;control::Int, target::Int, θs::Vector{<:Real}, isparas::Bool=[true for j in θs]) = FSIMGate(control, target, θs, isparas=isparas)
+FSIMGate(c::Int, t::Int, p::Vector{<:Real}; isparas::Vector{Bool}=[true for j in p]) = FSIMGate((c, t), p, isparas=isparas)
+FSIMGate(;control::Int, target::Int, θs::Vector{<:Real}, isparas::Vector{Bool}=[true for j in θs]) = FSIMGate(control, target, θs, isparas=isparas)
 
 mat(x::FSIMGate) = FSIM(x.paras...)
 change_positions(x::FSIMGate, m::AbstractDict) = FSIMGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
-
-
-
 
 

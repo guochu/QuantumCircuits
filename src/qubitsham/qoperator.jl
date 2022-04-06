@@ -77,12 +77,12 @@ end
 
 
 function matrix(L::Int, x::QubitsOperator)
-	is_constant(x) || error("input must be a constant operator.")
+	# is_constant(x) || error("input must be a constant operator.")
 	h = nothing
-	for (k, v) in data(x)
+	for (k, v) in x.data
 		for item in v
-			tmp = _generateprodham(L, sites_ops_to_dict(k, oplist(item))) * coeff(item)
-			if h === nothing
+			tmp = _generateprodham(L, sites_ops_to_dict(k, item[1])) * item[2]
+			if isnothing(h)
 			    h = tmp
 			else
 				h += tmp

@@ -1,8 +1,8 @@
 module Gates
 
-using QuantumCircuits: rkron
+using QuantumCircuits: rkron, n_qubits_mat_from_external
 
-export ZERO, ONE, PHASE, X, Y, Z, I₂, S, H, T, R, Rx, Ry, Rz, CZ, CNOT, SWAP, iSWAP, TOFFOLI, FREDKIN, FSIM, sqrtX, sqrtY
+export ZERO, ONE, PHASE, X, Y, Z, I₂, S, H, T, R, Rx, Ry, Rz, CZ, CNOT, SWAP, iSWAP, TOFFOLI, FREDKIN, FSIM, sqrtX, sqrtY, CONTROL, CONTROLCONTROL
 
 ZERO = [1., 0.]
 
@@ -82,7 +82,7 @@ end
 function GFSIM(theta::Real, phi::Real, deltap::Real, deltam::Real, deltamoff::Real)
 	m = [[1 0 0 0]; [0 exp(im*(deltap+deltam))*cos(theta) -im*exp(im*(deltap-deltamoff))*sin(theta) 0];
     [0 -im*exp(im*(deltap+deltamoff))*sin(theta) exp(im*(deltap-deltam))*cos(theta) 0]; [0 0 0 exp(im*(2*deltap-phi))]]
-    return two_qubits_mat_from_external(m)	
+    return n_qubits_mat_from_external(m)	
 end
 
 FSIM(theta::Real, phi::Real, deltap::Real, deltam::Real, deltamoff::Real) = GFSIM(theta, phi, deltap, deltam, deltamoff)

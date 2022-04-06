@@ -23,7 +23,7 @@ mat(x::Gate) = error("mat not implemented for gate type $(typeof(x)).")
 """
 	op(x::Gate)
 """
-op(x::Gate) = reshape(mat(x), ntuple(i=>2, 2*nqubits(x)))
+op(x::Gate) = reshape(mat(x), ntuple(i->2, 2*nqubits(x)))
 
 
 
