@@ -5,7 +5,7 @@ abstract type QuantumCircuit <: QuantumOperation end
 	Quantum Measurement
 """
 struct QMeasure <: QuantumOperation
-	key::Int
+	position::Int
 	auto_reset::Bool
 	keep::Bool
 
@@ -18,7 +18,7 @@ end
 	post selection, do we need it?
 """
 struct QSelect <: QuantumOperation
-	key::Int
+	position::Int
 	state::Int
 
 	function QSelect(key::Int, state::Int=0)

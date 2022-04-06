@@ -50,6 +50,7 @@ end
 
 change_positions(x::Gate, m::AbstractDict) = error("change_positions not implemented for gate type $(typeof(x)).")
 
+Base.eltype(x::Gate) = eltype(mat(x))
 
 function is_ordered(x::Gate)
 	pos = positions(x)
@@ -58,6 +59,8 @@ function is_ordered(x::Gate)
 	end
 	return true
 end
+
+
 
 
 

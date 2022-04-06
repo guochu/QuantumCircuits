@@ -13,6 +13,16 @@ function n_qubits_mat_from_external(m::AbstractMatrix)
 	return reshape(permute(reshape(m, Tuple(2 for i in 1:2*n)), v), size(m))
 end
 
+function _kron_ops(op)
+	isempty(op) && error("ops is empty.")
+	nb = length(op)
+	m = op[1]
+	for i = 2:length(op)
+	    m = kron(m, op[i])
+	end
+	return m
+end
+
 # function contract(a::AbstractArray{Ta, Na}, b::AbstractArray{Tb, Nb}, axs::Tuple{NTuple{N, Int}, NTuple{N, Int}}) where {Ta, Na, Tb, Nb, N}
 #     ia, ib = axs
 #     seqindex_a = move_selected_index_backward(collect(1:Na), ia)
