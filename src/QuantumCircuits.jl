@@ -5,7 +5,7 @@ using SparseArrays
 # gates
 export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions
 export parameters, nparameters, active_parameters, activate_parameter!, activate_parameters!, deactivate_parameter!, deactivate_parameters!, reset_parameters!
-export QuantumGate, AdjointQuantumGate, gate, XGate, YGate, ZGate, SGate, HGate, TGate, sqrtXGate, sqrtYGate
+export Gate, ParametricGate, QuantumGate, AdjointQuantumGate, gate, XGate, YGate, ZGate, SGate, HGate, TGate, sqrtXGate, sqrtYGate
 export SWAPGate, iSWAPGate, CZGate, CNOTGate
 export TOFFOLIGate, FREDKINGate
 
