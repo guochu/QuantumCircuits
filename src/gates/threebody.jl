@@ -68,6 +68,6 @@ CCPHASEGate(a::Int, b::Int, c::Int, θ::Real, isparas::Bool=true) = CCPHASEGate(
 
 
 mat(x::CCPHASEGate) = CONTROLCONTROL(PHASE(x.paras[1]))
-change_positions(x::CCPHASEGate, m::AbstractDict) = CCPHASEGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
+change_positions(x::CCPHASEGate, m::AbstractDict) = CCPHASEGate(ntuple(i->m[x.pos[i]], 3), x.paras, x.isparas)
 Base.adjoint(x::CCPHASEGate) = CCPHASEGate(positions(x), -x.paras, x.isparas)
 
