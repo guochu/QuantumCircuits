@@ -70,6 +70,19 @@ Base.push!(x::QCircuit, s::Tuple{NTuple{N, Int}, <:AbstractMatrix}) where N = pu
 
 change_positions(x::QCircuit, m::AbstractDict) = QCircuit([change_positions(o, m) for o in x.operations])
 
+shift(x::QCircuit, j::Int) = _shift_gate_util!(x, j, Dict{Int, Int}())
+
+function positions(x::QCircuit)
+	pos = Set{Int}()
+	for g in x
+		r = positions(g)
+		for item in r
+			push!(pos, item)
+		end
+	end
+	return sort([pos...])
+end
+
 function nparameters(x::QCircuit)
 	n = 0
 	for o in x
@@ -134,13 +147,10 @@ function reset_parameters_util!(x::QCircuit, p::Vector{<:Real}, pos::Int)
 	return pos
 end
 
-
-
-
-
-
-
-
-
-
-
+function _shift_gate_util!(x::QCircuit, j::Int, m::AbstractDict)
+	r = similar(x)
+	for item in x
+		push!(r, _shift_gate_util!(item, j, m))
+	end
+	return r
+end

@@ -3,7 +3,7 @@ module QuantumCircuits
 using SparseArrays
 
 # gates
-export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions, differentiate
+export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions, shift, differentiate
 export parameters, nparameters, active_parameters, activate_parameter!, activate_parameters!, deactivate_parameter!, deactivate_parameters!, reset_parameters!
 export Gate, ParametricGate, QuantumGate, AdjointQuantumGate, gate, XGate, YGate, ZGate, SGate, HGate, TGate, sqrtXGate, sqrtYGate
 export SWAPGate, iSWAPGate, CZGate, CNOTGate, CONTROLGate

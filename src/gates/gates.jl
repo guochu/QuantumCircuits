@@ -52,6 +52,12 @@ change_positions(x::Gate, m::AbstractDict) = error("change_positions not impleme
 
 Base.eltype(x::Gate) = eltype(mat(x))
 
+"""
+	shift(x::Gate, j::Int)
+	shift the positions of the gate by j
+"""
+shift(x::Gate, j::Int) = _shift_gate_util!(x, j, Dict{Int, Int}())
+
 function is_ordered(x::Gate)
 	pos = positions(x)
 	for i in 1:nqubits(x)-1
@@ -61,9 +67,6 @@ function is_ordered(x::Gate)
 end
 
 
-
-
-
 function _get_norm_order(key::NTuple{N, Int}, p) where N
 	seq = sortperm([key...])
 	perm = (seq..., [s + N for s in seq]...)
@@ -71,4 +74,10 @@ function _get_norm_order(key::NTuple{N, Int}, p) where N
 end
 
 
+function _shift_gate_util!(x::Gate, j::Int, m::AbstractDict)
+	for mj in positions(x)
+		get!(m, mj, mj+j)
+	end
+	return change_positions(x, m)
+end
 
