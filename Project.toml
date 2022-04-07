@@ -1,0 +1,7 @@
+name = "QuantumCircuits"
+uuid = "aefa5731-75ce-4e77-8b64-9dbb49b79a07"
+authors = ["Guo Chu <guochu604b@gmail.com>"]
+version = "0.0.1"
+
+[deps]
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
