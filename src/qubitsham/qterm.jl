@@ -32,7 +32,13 @@ Base.copy(x::QubitsTerm) = QubitsTerm(copy(positions(x)), copy(oplist(x)), coeff
 Base.isempty(x::QubitsTerm) = isempty(oplist(x))
 Base.adjoint(x::QubitsTerm) = QubitsTerm(copy(positions(x)), [item' for item in oplist(x)], conj(coeff(x)))
 
-
+function Base.eltype(x::QubitsTerm)
+	T = typeof(coeff(x))
+	for item in oplist(x)
+		T = promote_type(T, eltype(item))
+	end
+	return T
+end
 
 function _get_normal_order(key::Vector{Int}, op)
 	seq = sortperm(key)

@@ -98,6 +98,18 @@ matrix(L::Int, x::QubitsTerm) = _generateprodham(L, sites_ops_to_dict(positions(
 
 change_positions(x::QubitsOperator, m::AbstractDict) = QubitsOperator(QOP_DATA_TYPE(_index_map(k, m)=>v for (k, v) in x.data)) 
 
+function Base.eltype(x::QubitsOperator)
+	T = Int
+	for (k, v) in x.data
+		for (o, c) in v
+			T = promote_type(typeof(c), T)
+			for oj in o
+				T = promote_type(T, eltype(oj))
+			end
+		end
+	end
+	return T
+end
 
 # *(x::QubitsOperator, y::Number) = QubitsOperator(
 # 	Dict{Tuple{Int, Vararg{Int, N} where N}, BareBond{BareTerm{AbstractMatrix}}}(k=>(v*y) for (k, v) in data(x)))
