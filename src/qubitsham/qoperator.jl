@@ -137,7 +137,13 @@ _index_map(x::NTuple{N, Int}, mm::AbstractDict) where N = ntuple(j -> mm[x[j]], 
 
 
 
-
+function get_largest_pos(x::QubitsOperator)
+	L = 0
+	for (k, v) in x.data
+	    L = max(L, maximum(k))
+	end
+	return L
+end
 
 
 sites_ops_to_dict(sites, ops)= Dict(sites[j]=>ops[j] for j=1:length(sites))
