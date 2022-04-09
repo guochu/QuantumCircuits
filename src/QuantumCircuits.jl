@@ -19,7 +19,7 @@ export CCPHASEGate
 export QMeasure, QSelect, QCircuit
 
 # hamiltonian
-export QubitsTerm, oplist, coeff, QubitsOperator, matrix
+export QubitsTerm, oplist, coeff, QubitsOperator, matrix, simplify
 
 abstract type QuantumOperation end
 

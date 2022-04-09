@@ -43,7 +43,7 @@ function absorb_one_bodies(ham::QubitsOperator)
 	return r
 end
 
-reduce_terms(h::QubitsOperator) = absorb_one_bodies(h)
+simplify(h::QubitsOperator) = absorb_one_bodies(h)
 
 function add!(x::QubitsOperator, m::QubitsTerm)
 	pos = Tuple(positions(m))
