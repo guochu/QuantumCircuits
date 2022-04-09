@@ -36,7 +36,7 @@ function absorb_one_bodies(ham::QubitsOperator)
 			end
 		else
 			for item in value
-			    add!(r, QubitsTerm([key...], item))
+			    add!(r, QubitsTerm([key...], item[1], item[2]))
 			end
 		end
 	end
@@ -69,7 +69,7 @@ function Base.:+(x::QubitsOperator, y::QubitsOperator)
 	for (k, v) in y.data
 		kk = [k...]
 		for item in v
-		    add!(r, QubitsTerm(kk, item))
+		    add!(r, QubitsTerm(kk, item[1], item[2]))
 		end
 	end
 	return r
