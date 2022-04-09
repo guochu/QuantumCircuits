@@ -112,10 +112,8 @@ function Base.eltype(x::QubitsOperator)
 end
 
 Base.adjoint(x::QubitsOperator) = QubitsOperator(QOP_DATA_TYPE(k=>[(adjoint.(a), conj(b)) for (a, b) in v] for (k, v) in x.data))
-
-# *(x::QubitsOperator, y::Number) = QubitsOperator(
-# 	Dict{Tuple{Int, Vararg{Int, N} where N}, BareBond{BareTerm{AbstractMatrix}}}(k=>(v*y) for (k, v) in data(x)))
-# *(y::Number, x::QubitsOperator) = x * y
+Base.:*(x::QubitsOperator, y::Number) = QubitsOperator(QOP_DATA_TYPE(k=>[(a, b*y) for (a, b) in v] for (k, v) in x.data))
+Base.:*(y::Number, x::QubitsOperator) = x * y
 
 # function Base.getindex(h::QubitsOperator, v::Vector{Int})
 # 	index_map = Dict(vj=>j for (j, vj) in enumerate(v))

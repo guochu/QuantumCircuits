@@ -30,7 +30,9 @@ QubitsTerm(x::Pair{Int, <:Union{AbstractString, AbstractMatrix}}...; coeff::Numb
 
 Base.copy(x::QubitsTerm) = QubitsTerm(copy(positions(x)), copy(oplist(x)), coeff(x))
 Base.isempty(x::QubitsTerm) = isempty(oplist(x))
-Base.adjoint(x::QubitsTerm) = QubitsTerm(copy(positions(x)), [item' for item in oplist(x)], conj(coeff(x)))
+Base.adjoint(x::QubitsTerm) = QubitsTerm(positions(x), [item' for item in oplist(x)], conj(coeff(x)))
+Base.:*(x::QubitsTerm, y::Number) = QubitsTerm(positions(x), oplist(x), coeff(x)*y)
+Base.:*(x::Number, y::QubitsTerm) = y * x
 
 function Base.eltype(x::QubitsTerm)
 	T = typeof(coeff(x))
