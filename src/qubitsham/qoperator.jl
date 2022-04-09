@@ -28,8 +28,8 @@ function absorb_one_bodies(ham::QubitsOperator)
 			for (k2, v2) in ham.data
 			    if ((length(k2) > 1) && (i in k2))
 			    	for item in value
-			    		ops = [ (kk == i) ? oplist(item)[1] : iden for kk in k2]
-			    		add!(r, QubitsTerm([k2...], ops, coeff(item)))
+			    		ops = [ (kk == i) ? item[1][1] : iden for kk in k2]
+			    		add!(r, QubitsTerm([k2...], ops, item[2]))
 			        end
 			        break
 			    end
