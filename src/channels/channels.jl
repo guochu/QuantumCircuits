@@ -29,7 +29,7 @@ function _is_tp(m::Vector{<:AbstractMatrix})
 	isempty(m) && error("no kraus operators.")
 	out = m[1]' * m[1]
 	for i in 2:length(m)
-		out .+= m[i]' * m
+		out .+= m[i]' * m[i]
 	end
 	return out ≈ I
 end

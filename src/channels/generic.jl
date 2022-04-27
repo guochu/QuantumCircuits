@@ -24,7 +24,7 @@ QuantumMap(pos::Vector{Int}, m::Vector{<:AbstractMatrix}) = QuantumMap(Tuple(pos
 QuantumMap(pos::Int, m::Vector{<:AbstractMatrix}) = QuantumMap((pos,), m)
 
 positions(x::QuantumMap) = x.pos
-kraus_matrices(x::QuantumMap) = x.data
+kraus_matrices(x::QuantumMap) = x.kraus
 ordered_positions(x::QuantumMap) = x.ordered_pos
 ordered_supermat(x::QuantumMap) = x.ordered_data
 change_positions(x::QuantumMap{N}, m::AbstractDict) where N = QuantumMap(ntuple(i->m[x.pos[i]], N), kraus_matrices(x))

@@ -16,7 +16,8 @@ export CCPHASEGate
 
 
 # quantum channel
-export QuantumMap, ordered_supermat, kraus_matrices
+export QuantumMap, ordered_supermat, kraus_matrices, is_tp
+export AmplitudeDamping, PhaseDamping
 
 
 # circuit 
@@ -49,6 +50,7 @@ include("gates/gatediff.jl")
 # quantum channel
 include("channels/channels.jl")
 include("channels/generic.jl")
+include("channels/onebody.jl")
 
 # circuit
 include("circuit.jl")
