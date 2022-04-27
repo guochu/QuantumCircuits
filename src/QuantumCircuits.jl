@@ -16,7 +16,7 @@ export CCPHASEGate
 
 
 # quantum channel
-export QuantumMap, ordered_supermat, kraus_matrices, is_tp
+export AbstractQuantumMap, QuantumMap, ordered_supermat, kraus_matrices, is_tp
 export AmplitudeDamping, PhaseDamping
 
 

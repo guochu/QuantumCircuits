@@ -28,7 +28,7 @@ struct QSelect <: QuantumOperation
 end
 
 
-const CircuitElement = Union{QuantumCircuit, Gate}
+const CircuitElement = Union{QuantumCircuit, Gate, AbstractQuantumMap}
 
 
 """
