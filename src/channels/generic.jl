@@ -41,9 +41,9 @@ end
 function _compute_supermat(p::Vector{<:AbstractMatrix})
 	isempty(p) && error("no kraus operators.")
 	d = size(p[1], 1)
-	@tensor m[1,4,2,3] := p[1][1,2] * conj(p[1][3,4])
+	@tensor m[1,3,2,4] := p[1][1,2] * conj(p[1][3,4])
 	for i in 2:length(p)
-		@tensor m[1,4,2,3] += p[i][1,2] * conj(p[i][3,4])
+		@tensor m[1,3,2,4] += p[i][1,2] * conj(p[i][3,4])
 	end
 	return reshape(m, d^2, d^2)
 end
