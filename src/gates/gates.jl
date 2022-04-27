@@ -58,23 +58,24 @@ Base.eltype(x::Gate) = eltype(mat(x))
 """
 shift(x::Gate, j::Int) = _shift_gate_util!(x, j, Dict{Int, Int}())
 
-function is_ordered(x::Gate)
-	pos = positions(x)
-	for i in 1:nqubits(x)-1
+is_ordered(x::Gate) = _is_pos_ordered(positions(x))
+
+
+function _is_pos_ordered(pos::Vector{Int})
+	for i in 1:length(pos)-1
 		(pos[i] < pos[i+1]) || return false
-	end
+	end	
 	return true
 end
 
-
-function _get_norm_order(key::NTuple{N, Int}, p) where N
+function _get_norm_order(key::NTuple{N, Int}, p::AbstractArray) where N
 	seq = sortperm([key...])
 	perm = (seq..., [s + N for s in seq]...)
 	return key[seq], permute(p, perm)
 end
 
 
-function _shift_gate_util!(x::Gate, j::Int, m::AbstractDict)
+function _shift_gate_util!(x, j::Int, m::AbstractDict)
 	for mj in positions(x)
 		get!(m, mj, mj+j)
 	end

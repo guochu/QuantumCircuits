@@ -8,6 +8,7 @@ end
 QubitsOperator() = QubitsOperator(QOP_DATA_TYPE())
 
 Base.copy(x::QubitsOperator) = QubitsOperator(copy(x.data))
+Base.keys(x::QubitsOperator) = keys(x.data)
 
 function QubitsOperator(x::QubitsTerm, v::QubitsTerm...)
 	r = QubitsOperator()

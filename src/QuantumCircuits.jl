@@ -1,6 +1,6 @@
 module QuantumCircuits
 
-using SparseArrays
+using SparseArrays, LinearAlgebra, TensorOperations
 
 # gates
 export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions, shift, differentiate
@@ -13,6 +13,10 @@ export TOFFOLIGate, FREDKINGate, CONTROLCONTROLGate
 export RxGate, RyGate, RzGate, PHASEGate
 export CRxGate, CRyGate, CRzGate, CPHASEGate, FSIMGate
 export CCPHASEGate
+
+
+# quantum channel
+export QuantumMap, ordered_supermat, kraus_matrices
 
 
 # circuit 
@@ -41,6 +45,10 @@ include("gates/onebody.jl")
 include("gates/twobody.jl")
 include("gates/threebody.jl")
 include("gates/gatediff.jl")
+
+# quantum channel
+include("channels/channels.jl")
+include("channels/generic.jl")
 
 # circuit
 include("circuit.jl")
