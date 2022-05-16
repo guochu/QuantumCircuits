@@ -61,7 +61,7 @@ shift(x::Gate, j::Int) = _shift_gate_util!(x, j, Dict{Int, Int}())
 is_ordered(x::Gate) = _is_pos_ordered(positions(x))
 
 
-function _is_pos_ordered(pos::Vector{Int})
+function _is_pos_ordered(pos)
 	for i in 1:length(pos)-1
 		(pos[i] < pos[i+1]) || return false
 	end	
