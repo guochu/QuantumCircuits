@@ -80,8 +80,8 @@ struct RxGate <: ParametricGate{1}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-RxGate(pos::Int, p::Real; isparas::Bool=true) = RxGate((pos,), [convert(Float64, p)], [isparas])
-RxGate(pos::Int; θ::Real, isparas::Bool=true) = RxGate(pos, θ, isparas=isparas)
+RxGate(pos::Int, p::Real; isparas::Bool=false) = RxGate((pos,), [convert(Float64, p)], [isparas])
+RxGate(pos::Int; θ::Real, isparas::Bool=false) = RxGate(pos, θ, isparas=isparas)
 
 mat(x::RxGate) = Rx(x.paras[1])
 change_positions(s::RxGate, m::AbstractDict) = RxGate((m[s.pos[1]],), s.paras, s.isparas)
@@ -92,8 +92,8 @@ struct RyGate <: ParametricGate{1}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-RyGate(pos::Int, p::Real; isparas::Bool=true) = RyGate((pos,), [convert(Float64, p)], [isparas])
-RyGate(pos::Int; θ::Real, isparas::Bool=true) = RyGate(pos, θ, isparas=isparas)
+RyGate(pos::Int, p::Real; isparas::Bool=false) = RyGate((pos,), [convert(Float64, p)], [isparas])
+RyGate(pos::Int; θ::Real, isparas::Bool=false) = RyGate(pos, θ, isparas=isparas)
 
 mat(x::RyGate) = Ry(x.paras[1])
 change_positions(s::RyGate, m::AbstractDict) = RyGate((m[s.pos[1]],), s.paras, s.isparas)
@@ -104,8 +104,8 @@ struct RzGate <: ParametricGate{1}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-RzGate(pos::Int, p::Real; isparas::Bool=true) = RzGate((pos,), [convert(Float64, p)], [isparas])
-RzGate(pos::Int; θ::Real, isparas::Bool=true) = RzGate(pos, θ, isparas=isparas)
+RzGate(pos::Int, p::Real; isparas::Bool=false) = RzGate((pos,), [convert(Float64, p)], [isparas])
+RzGate(pos::Int; θ::Real, isparas::Bool=false) = RzGate(pos, θ, isparas=isparas)
 
 mat(x::RzGate) = Rz(x.paras[1])
 change_positions(s::RzGate, m::AbstractDict) = RzGate((m[s.pos[1]],), s.paras, s.isparas)
@@ -116,8 +116,8 @@ struct PHASEGate <: ParametricGate{1}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-PHASEGate(pos::Int, p::Real; isparas::Bool=true) = PHASEGate((pos,), [convert(Float64, p)], [isparas])
-PHASEGate(pos::Int; θ::Real, isparas::Bool=true) = PHASEGate(pos, θ, isparas=isparas)
+PHASEGate(pos::Int, p::Real; isparas::Bool=false) = PHASEGate((pos,), [convert(Float64, p)], [isparas])
+PHASEGate(pos::Int; θ::Real, isparas::Bool=false) = PHASEGate(pos, θ, isparas=isparas)
 
 mat(x::PHASEGate) = PHASE(x.paras[1])
 change_positions(s::PHASEGate, m::AbstractDict) = PHASEGate((m[s.pos[1]],), s.paras, s.isparas)

@@ -85,9 +85,9 @@ struct CRxGate <:ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-CRxGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=true) = CRxGate(key, [convert(Float64, p)], [isparas])
-CRxGate(c::Int, t::Int, p::Real; isparas::Bool=true) = CRxGate((c, t), p, isparas=isparas)
-CRxGate(;control::Int, target::Int, θ::Real, isparas::Bool=true) = CRxGate(control, target, θ, isparas=isparas)
+CRxGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=false) = CRxGate(key, [convert(Float64, p)], [isparas])
+CRxGate(c::Int, t::Int, p::Real; isparas::Bool=false) = CRxGate((c, t), p, isparas=isparas)
+CRxGate(;control::Int, target::Int, θ::Real, isparas::Bool=false) = CRxGate(control, target, θ, isparas=isparas)
 
 mat(x::CRxGate) = CONTROL(Rx(x.paras[1]))
 change_positions(x::CRxGate, m::AbstractDict) = CRxGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
@@ -99,9 +99,9 @@ struct CRyGate <: ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-CRyGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=true) = CRyGate(key, [convert(Float64, p)], [isparas])
-CRyGate(c::Int, t::Int, p::Real; isparas::Bool=true) = CRyGate((c, t), p, isparas=isparas)
-CRyGate(;control::Int, target::Int, θ::Real, isparas::Bool=true) = CRyGate(control, target, θ, isparas=isparas)
+CRyGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=false) = CRyGate(key, [convert(Float64, p)], [isparas])
+CRyGate(c::Int, t::Int, p::Real; isparas::Bool=false) = CRyGate((c, t), p, isparas=isparas)
+CRyGate(;control::Int, target::Int, θ::Real, isparas::Bool=false) = CRyGate(control, target, θ, isparas=isparas)
 
 mat(x::CRyGate) = CONTROL(Ry(x.paras[1]))
 change_positions(x::CRyGate, m::AbstractDict) = CRyGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
@@ -112,9 +112,9 @@ struct CRzGate <: ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-CRzGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=true) = CRzGate(key, [convert(Float64, p)], [isparas])
-CRzGate(c::Int, t::Int, p::Real; isparas::Bool=true) = CRzGate((c, t), p, isparas=isparas)
-CRzGate(;control::Int, target::Int, θ::Real, isparas::Bool=true) = CRzGate(control, target, θ, isparas=isparas)
+CRzGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=false) = CRzGate(key, [convert(Float64, p)], [isparas])
+CRzGate(c::Int, t::Int, p::Real; isparas::Bool=false) = CRzGate((c, t), p, isparas=isparas)
+CRzGate(;control::Int, target::Int, θ::Real, isparas::Bool=false) = CRzGate(control, target, θ, isparas=isparas)
 
 mat(x::CRzGate) = CONTROL(Rz(x.paras[1]))
 change_positions(x::CRzGate, m::AbstractDict) = CRzGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
@@ -125,9 +125,9 @@ struct CPHASEGate <: ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-CPHASEGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=true) = CPHASEGate(key, [convert(Float64, p)], [isparas])
-CPHASEGate(c::Int, t::Int, p::Real; isparas::Bool=true) = CPHASEGate((c, t), p, isparas=isparas)
-CPHASEGate(;control::Int, target::Int, θ::Real, isparas::Bool=true) = CPHASEGate(control, target, θ, isparas=isparas)
+CPHASEGate(key::Tuple{Int, Int}, p::Real; isparas::Bool=false) = CPHASEGate(key, [convert(Float64, p)], [isparas])
+CPHASEGate(c::Int, t::Int, p::Real; isparas::Bool=false) = CPHASEGate((c, t), p, isparas=isparas)
+CPHASEGate(;control::Int, target::Int, θ::Real, isparas::Bool=false) = CPHASEGate(control, target, θ, isparas=isparas)
 
 mat(x::CPHASEGate) = CONTROL(PHASE(x.paras[1]))
 change_positions(x::CPHASEGate, m::AbstractDict) = CPHASEGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
@@ -140,12 +140,12 @@ struct FSIMGate <: ParametricGate{2}
 	paras::Vector{Float64}
 	isparas::Vector{Bool}
 end
-function FSIMGate(key::Tuple{Int, Int}, p::Vector{<:Real}; isparas::Vector{Bool}=[true for j in p])
+function FSIMGate(key::Tuple{Int, Int}, p::Vector{<:Real}; isparas::Vector{Bool}=[false for j in p])
 	(length(p) == 5) || throw(ArgumentError("5 parameters expected."))
 	return FSIMGate(key, convert(Vector{Float64}, p) , isparas)
 end 
-FSIMGate(c::Int, t::Int, p::Vector{<:Real}; isparas::Vector{Bool}=[true for j in p]) = FSIMGate((c, t), p, isparas=isparas)
-FSIMGate(;control::Int, target::Int, θs::Vector{<:Real}, isparas::Vector{Bool}=[true for j in θs]) = FSIMGate(control, target, θs, isparas=isparas)
+FSIMGate(c::Int, t::Int, p::Vector{<:Real}; isparas::Vector{Bool}=[false for j in p]) = FSIMGate((c, t), p, isparas=isparas)
+FSIMGate(;control::Int, target::Int, θs::Vector{<:Real}, isparas::Vector{Bool}=[false for j in θs]) = FSIMGate(control, target, θs, isparas=isparas)
 
 mat(x::FSIMGate) = FSIM(x.paras...)
 change_positions(x::FSIMGate, m::AbstractDict) = FSIMGate(ntuple(i->m[x.pos[i]], 2), x.paras, x.isparas)
