@@ -25,6 +25,9 @@ shift(x::AbstractQuantumMap, j::Int) = _shift_gate_util!(x, j, Dict{Int, Int}())
 is_tp(x::AbstractQuantumMap) = _is_tp(kraus_matrices(x))
 
 
+# QuantumMap can not contain parameters
+active_parameters(x::AbstractQuantumMap) = nothing
+
 function _is_tp(m::Vector{<:AbstractMatrix})
 	isempty(m) && error("no kraus operators.")
 	out = m[1]' * m[1]
