@@ -26,6 +26,7 @@ is_tp(x::AbstractQuantumMap) = _is_tp(kraus_matrices(x))
 
 
 # QuantumMap can not contain parameters
+nparameters(x::AbstractQuantumMap) = 0
 active_parameters(x::AbstractQuantumMap) = nothing
 
 function _is_tp(m::Vector{<:AbstractMatrix})
