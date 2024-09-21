@@ -165,3 +165,9 @@ function _shift_gate_util!(x::QCircuit, j::Int, m::AbstractDict)
 	end
 	return r
 end
+
+
+# utilities for collect_parameters_impl!(a::Vector, x::QCircuit)
+function collect_parameters_impl!(a::Vector, x::AbstractArray{<:Number})
+	append!(a, x)
+end
