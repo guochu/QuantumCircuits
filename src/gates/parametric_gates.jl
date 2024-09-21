@@ -20,7 +20,14 @@ activate_parameters!(x::Gate) = x
 deactivate_parameter!(x::Gate, j::Int) = x
 deactivate_parameters!(x::Gate) = x
 
-function reset_parameters_util!(x::Gate, p::Vector{<:Real}, pos::Int)
+function collect_parameters_impl!(a::Vector, x::Gate)
+	paras = parameters(x)
+	if !isnothing(paras)
+		append!(a, paras)
+	end
+end
+
+function reset_parameters_impl!(x::Gate, p::Vector{<:Real}, pos::Int)
 	n = nparameters(x)
 	(n == 0) && return pos
 	parameters(x)[is_parameters(x)] .= view(p, pos+1:(pos+n))

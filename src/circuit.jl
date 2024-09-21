@@ -91,16 +91,27 @@ function nparameters(x::QCircuit)
 	return n
 end
 
+# function parameters(x::QCircuit)
+# 	paras = Float64[]
+# 	for o in x
+# 		p = parameters(o)
+# 		if !isnothing(p)
+# 			append!(paras, p)
+# 		end
+# 	end
+# 	return paras
+# end
 function parameters(x::QCircuit)
 	paras = Float64[]
-	for o in x
-		p = parameters(o)
-		if !isnothing(p)
-			append!(paras, p)
-		end
-	end
+	collect_parameters_impl!(paras, x)
 	return paras
 end
+function collect_parameters_impl!(a::Vector, x::QCircuit)
+	for o in x
+		collect_parameters_impl!(a, o)
+	end	
+end
+
 function active_parameters(x::QCircuit)
 	paras = Float64[]
 	for o in x
@@ -134,15 +145,15 @@ end
 
 function reset_parameters!(x::QCircuit, p::Vector{<:Real})
 	(nparameters(x) == length(p)) || throw("number of parameters mismatch.")
-	pos = reset_parameters_util!(x, p, 0)
+	pos = reset_parameters_impl!(x, p, 0)
 	@assert pos == length(p)
 	return x
 end
 
 
-function reset_parameters_util!(x::QCircuit, p::Vector{<:Real}, pos::Int)
+function reset_parameters_impl!(x::QCircuit, p::Vector{<:Real}, pos::Int)
 	for o in x
-		pos = reset_parameters_util!(o, p, pos)
+		pos = reset_parameters_impl!(o, p, pos)
 	end
 	return pos
 end
