@@ -171,3 +171,8 @@ end
 function collect_parameters_impl!(a::Vector, x::AbstractArray{<:Number})
 	append!(a, x)
 end
+function reset_parameters_impl!(x::AbstractArray{<:Number}, p::Vector{<:Real}, pos::Int)
+	n = length(x)
+	x[:] = view(p, pos+1:(pos+n))
+	return pos + n
+end
