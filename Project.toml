@@ -1,9 +1,16 @@
 name = "QuantumCircuits"
 uuid = "aefa5731-75ce-4e77-8b64-9dbb49b79a07"
 authors = ["Guo Chu <guochu604b@gmail.com>"]
-version = "0.0.1"
+version = "0.1.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
+
+[extras]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "LinearAlgebra", "SparseArrays"]

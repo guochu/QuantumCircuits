@@ -1,64 +1,86 @@
+"""
+    QuantumCircuits
+
+全栈量子软件的**唯一中间表示（IR）层**：从算法线路到 QEC 综合征线路再到
+QCCD 编译产物，共用这一种表示。
+
+设计原则：
+
+1. **定义与定位分离**（Cirq 模式）：`Gate` 是不携带比特位置的数学对象；
+   `Gate` 作用于比特后得到 `Operation`。线路是 `Operation` 的序列。
+2. **IR 无执行语义**：本包不定义 `apply!` 到任何态，作用入口由各模拟器后端实现。
+3. **经典层一等公民**：经典寄存器、测量写回、条件分支进 IR。
+4. **修饰符可组合**：`inv / pow / ctrl / negctrl` 四个惰性包装。
+5. **布局一等公民**：线路自带 `initial_layout / output_permutation`。
+6. **开放类型 + 小接口**：`Operation` 是抽象类型，下游只需实现最小协议
+   （`qubits` / `clbits` / `is_unitary` / `mat`）。
+7. **约定**：小端序（qubit 0 = 最低有效位）；类型 PascalCase、函数 snake_case、
+   `!` 表示就地修改。
+8. **参数用符号**：门参数接受 `Real | Param | Symbol`，变分工作流先建线路后绑参。
+
+模块结构：`bits` / `params` / `gates` / `modifiers` / `ops` / `channels` /
+`classical` / `circuit` / `composite` / `dag` / `Hamiltonian`（子模块）/ `io`。
+"""
 module QuantumCircuits
 
-# gates
-export nqubits, positions, mat, ordered_positions, ordered_mat, change_positions, shift, differentiate
-export parameters, nparameters, active_parameters, activate_parameter!, activate_parameters!, deactivate_parameter!, deactivate_parameters!, reset_parameters!
-export Gate, ParametricGate, QuantumGate, AdjointQuantumGate, gate, XGate, YGate, ZGate, SGate, HGate, TGate, sqrtXGate, sqrtYGate
-export SWAPGate, iSWAPGate, CZGate, CNOTGate, CONTROLGate
-export TOFFOLIGate, FREDKINGate, CONTROLCONTROLGate
+using LinearAlgebra
 
-# parametric gates
-export RxGate, RyGate, RzGate, PHASEGate
-export CRxGate, CRyGate, CRzGate, CPHASEGate, FSIMGate
-export CCPHASEGate
+# ── 比特 / 寄存器 ──
+export Qubit, QReg, CReg, ClbitRef
 
+# ── 门 ──
+export Gate, ConstGate, ParamGate, UserGate,
+       H, X, Y, Z, S, T, SDAG, TDAG, SX, ID,
+       CX, CY, CZ, CH, SWAP, ISWAP, CCX, CSWAP,
+       RX, RY, RZ, PHASE, CRX, CPHASE, RXX, RZZ, MS, VirtualZ,
+       usergate
 
-# quantum channel
-export AbstractQuantumMap, QuantumMap, ordered_supermat, kraus_matrices, is_tp
-export AmplitudeDamping, PhaseDamping, Depolarizing
+# ── 修饰符 ──
+export pow, ctrl, negctrl            # inv 直接扩展 Base.inv，无需再导出
 
+# ── 操作 ──
+export Operation, GateOp, MeasOp, ResetOp, BarrierOp, ChannelOp, IfOp, BlockOp,
+       measure, measure_all!, barrier, block,
+       unroll, unroll!, assign, assign!
+# 注意：`reset` 与 Base 导出的 `reset` 同名（行为不同），不导出；
+# 使用时请 `import QuantumCircuits: reset` 或显式限定。
 
-# circuit 
-export QMeasure, QSelect, QCircuit
+# ── 信道 ──
+export Channel, KrausChannel, PauliChannel, UnitaryChannel,
+       PauliError, Depolarizing, AmplitudeDamping, PhaseDamping, kraus
 
-# hamiltonian
-export QubitsTerm, oplist, coeff, QubitsOperator, matrix, simplify
+# ── 经典控制 ──
+export Cond, if_then
 
+# ── 线路 ──
+export Circuit, Layout,
+       Param, ParamVector, params, parameters, dagger,
+       depth, num_ops, count_ops, qubits_used, validate, dag,
+       CircuitDAG, nodes, dependencies
+# `push!` / `append!` / `<<` 是对 Base 函数的扩展，Base 已导出，直接可用，无需重复导出。
 
-using SparseArrays, LinearAlgebra, TensorOperations
+# ── IO ──
+export to_qasm, write_qasm, read_qasm
 
+# ── 协议（下游扩展点） ──
+export qubits, clbits, is_unitary, mat
 
-abstract type QuantumOperation end
+# ── Gate 接口（门作者使用） ──
+export nqubits, num_params, name
 
-# auxiliary
-include("auxiliary/tensorops.jl")
+include("bits.jl")
+include("params.jl")
+include("gates.jl")        # Gate 抽象 + 门库单例
+include("channels.jl")     # 信道类型 + kraus + 噪声指令构造
+include("ops.jl")          # Operation + GateOp/MeasOp/ResetOp/BarrierOp/ChannelOp
+include("modifiers.jl")    # inv / pow / ctrl / negctrl
+include("circuit.jl")      # Circuit + DSL + 分析 + 绑参
+include("classical.jl")    # Cond + IfOp + if_then
+include("composite.jl")    # UserGate + BlockOp + flatten + 矩阵嵌入
+include("dag.jl")          # 依赖 DAG
+include("hamiltonian.jl")  # 子模块 Hamiltonian
+include("io/io.jl")        # to_qasm / write_qasm / read_qasm + 共享工具
+include("io/qasm2.jl")     # QASM2 读写 + 统一解析器
+include("io/qasm3.jl")     # QASM3 读写
 
-
-# elementary gate matrices
-include("elemops.jl")
-
-using QuantumCircuits.Gates
-
-
-# gate operations
-include("gates/gates.jl")
-include("gates/generic.jl")
-include("gates/parametric_gates.jl")
-include("gates/onebody.jl")
-include("gates/twobody.jl")
-include("gates/threebody.jl")
-include("gates/gatediff.jl")
-
-# quantum channel
-include("channels/channels.jl")
-include("channels/generic.jl")
-include("channels/onebody.jl")
-
-# circuit
-include("circuit.jl")
-
-# qubit hamiltonian
-include("qubitsham/qterm.jl")
-include("qubitsham/qoperator.jl")
-
-end
+end # module

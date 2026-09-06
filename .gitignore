@@ -1,0 +1,8 @@
+# Julia
+Manifest.toml
+
+# Documenter.jl 构建产物
+docs/build/
+
+# 编辑器 / 系统
+.DS_Store
