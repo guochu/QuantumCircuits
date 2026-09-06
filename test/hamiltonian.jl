@@ -15,10 +15,17 @@
     @test length(s.terms) == 2
     # 矩阵展开（小端序）：qubit 0 = 最低位 → kron(P_1, P_0)；全实项 ⇒ 实矩阵
     m = mat(PauliSum([PauliTerm(1.0, 0=>:X)]), 2)
-    @test m isa SparseMatrixCSC{Float64}
+    @test m isa Matrix{Float64}
     @test approxeq(Matrix(m), kron(I2, mat(X)))
     m2 = mat(PauliSum([PauliTerm(1.0, 1=>:Z, 0=>:X)]), 2)
     @test approxeq(Matrix(m2), kron(mat(Z), mat(X)))
+    # 单项展开
+    mt = mat(PauliTerm(2.0, 1=>:Z, 0=>:X), 2)
+    @test mt isa Matrix{Float64}
+    @test approxeq(mt, 2 * kron(mat(Z), mat(X)))
+    mc = mat(PauliTerm(1.0, 0=>:Y), 1)
+    @test mc isa Matrix{ComplexF64}
+    @test approxeq(mc, mat(Y))
     # 乘法分配
     s12 = PauliSum([PauliTerm(1.0, 0=>:X)]) * PauliSum([PauliTerm(1.0, 0=>:Y)])
     @test length(s12.terms) == 1 && s12.terms[1].coeff ≈ im

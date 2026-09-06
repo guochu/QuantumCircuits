@@ -29,13 +29,14 @@ h = PauliSum([PauliTerm(1.0, 0=>:Z), PauliTerm(0.5, 1=>:X)])
 ## 3. 展开为矩阵
 
 ```julia
-mat(h::PauliSum, n::Int)   # → SparseMatrixCSC（2^n × 2^n）
+mat(h::PauliSum, n::Int)   # → Matrix（稠密，2^n × 2^n）
+mat(t::PauliTerm, n::Int)  # 单项同样支持
 ```
 
 - **小端序**：qubit 0 = 最低有效位，即 `PauliTerm(1.0, 0=>:X)` 在 2 比特空间为
   `kron(I₂, X)`；
-- 元素类型随系数与 Pauli 串自然提升（全实项 ⇒ `SparseMatrixCSC{Float64}`，
-  含 `:Y` 或复系数 ⇒ `ComplexF64`）；
+- 输出为**稠密矩阵**，元素类型随系数与 Pauli 串自然提升
+  （全实项 ⇒ `Matrix{Float64}`，含 `:Y` 或复系数 ⇒ `ComplexF64`）；
 - `expectation` 由模拟器后端实现，本包**不**提供。
 
 ## 4. 示例：氢分子 H₂（STO-3G, 0.7414 Å）哈密顿量的写法

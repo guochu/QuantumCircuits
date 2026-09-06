@@ -11,7 +11,7 @@ import Pkg
 Pkg.develop(path = "path/to/QuantumCircuits")
 ```
 
-依赖仅 `LinearAlgebra` 与 `SparseArrays`（均为 Julia 标准库）。
+依赖仅 Julia 标准库 `LinearAlgebra`。
 
 ## 快速上手
 

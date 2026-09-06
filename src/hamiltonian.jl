@@ -9,7 +9,6 @@
 module Hamiltonian
 
 using LinearAlgebra
-using SparseArrays
 
 export PauliTerm, PauliSum
 
@@ -172,16 +171,23 @@ Base.adjoint(t::PauliTerm) = _pauli_term(conj(t.coeff), t.ops)
 Base.adjoint(s::PauliSum) = PauliSum([adjoint(t) for t in s.terms])
 
 """
-展开为 `n` 比特空间的 `2^n × 2^n` 稀疏矩阵（小端序：qubit 0 = 最低有效位）。
+展开单个 Pauli 项为 `n` 比特空间的 `2^n × 2^n` 稠密矩阵。
+"""
+function mat(t::PauliTerm, n::Int)
+    return t.coeff * _kron_term(t.ops, n)
+end
+
+"""
+展开为 `n` 比特空间的 `2^n × 2^n` **稠密**矩阵（小端序：qubit 0 = 最低有效位）。
 结果元素类型随系数与 Pauli 串自然提升（全实项 ⇒ 实矩阵）。
 """
 function mat(h::PauliSum{T}, n::Int) where {T}
     d = 1 << n
-    M = spzeros(T, d, d)
+    M = zeros(T, d, d)
     for t in h.terms
-        M = M + t.coeff * sparse(_kron_term(t.ops, n))
+        M = M + t.coeff * mat(t, n)
     end
-    return dropzeros!(M)
+    return M
 end
 
 function _kron_term(ops::Vector{Pair{Int,Symbol}}, n::Int)

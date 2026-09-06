@@ -5,7 +5,6 @@ using QuantumCircuits: _embed, _compose_unitary, _matrix_pow, _U3,
 import QuantumCircuits: reset
 using QuantumCircuits.Hamiltonian
 using LinearAlgebra
-using SparseArrays
 
 include("common.jl")
 
