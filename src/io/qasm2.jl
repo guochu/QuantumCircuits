@@ -132,7 +132,7 @@ function _qasm2_op!(io::IO, op::Operation, qoff, coff)
     if op isa GateOp
         _qasm2_gateexpr(io, op, qoff)
         println(io, ";")
-    elseif op isa ResetOp
+    elseif op isa ReinitOp
         for q in op.qubits
             print(io, "reset ")
             _qasm_bit(io, qoff, q)
@@ -225,7 +225,7 @@ function _parse_stmt!(st::_QASMParseState, stmt::AbstractString)
         push!(st.ops, BarrierOp(_resolve_barrier_bits(st, _argtail(stmt))))
     elseif head == "reset"
         for q in _resolve_operand_group(st, _argtail(stmt))
-            push!(st.ops, ResetOp(q))
+            push!(st.ops, ReinitOp(q))
         end
     elseif head == "measure"
         _parse_measure!(st, stmt)

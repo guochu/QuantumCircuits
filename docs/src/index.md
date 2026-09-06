@@ -51,6 +51,11 @@ push!(noisy, Depolarizing([0, 1], 1e-3))
 push!(noisy, PauliError(1, (1e-3, 1e-3, 2e-3)))
 ```
 
+## 可视化
+
+REPL 中直接回车显示线路即文本图，也可显式 `draw(c)`（`ascii = true` 用纯 ASCII 符号）。
+图形输出（SVG/PNG/PDF）由 Luxor 包扩展提供，见[扩展协议 §5](extending.md)。
+
 ## 文档目录
 
 | 页面 | 内容 |
@@ -64,6 +69,7 @@ push!(noisy, PauliError(1, (1e-3, 1e-3, 2e-3)))
 | [QASM 序列化](io.md) | OpenQASM 2 / 3 |
 | [扩展协议](extending.md) | 下游扩展（自定义 Operation） |
 | [API 参考](api.md) | 由源码 docstring 自动生成 |
+| [API 教程 notebook](tutorials/api/api_tutorial.ipynb) | Jupyter Notebook：全 API 演示 + 图形渲染 |
 
 ## 构建
 

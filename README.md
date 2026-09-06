@@ -80,6 +80,30 @@ push!(noisy, PauliError(1, (1e-3, 1e-3, 2e-3)))
 完整约定（含门矩阵 ↔ 2k 阶张量的精确转换公式）见
 [docs/src/conventions.md](docs/src/conventions.md)。
 
+## 线路可视化
+
+文本图 `draw` 始终可用（REPL 中直接回车显示线路即为此图）：
+
+```julia
+julia> c = Circuit(2); push!(c, H(0)); push!(c, CX(0, 1))
+julia> draw(c)
+q0: ─H──●─
+     │
+q1: ────X─
+```
+
+图形输出由**包扩展**提供——安装并加载
+[Luxor](https://github.com/JuliaGraphics/Luxor.jl)（弱依赖）后自动启用：
+
+```julia
+using Luxor                          # 触发扩展 QuantumCircuitsLuxorExt
+ext = Base.get_extension(QuantumCircuits, :QuantumCircuitsLuxorExt)
+ext.save_plot(c, "bell.svg")         # svg / png / pdf（按扩展名）
+s = ext.plot(c)                      # SVG 字符串
+```
+
+不安装 Luxor 不影响本包任何 IR 功能；测试环境通过 `Pkg.test()` 自动接入 Luxor。
+
 ## 文档
 
 按 Julia 标准方式使用 [Documenter.jl](https://documenter.juliadocs.org/stable/) 构建：

@@ -238,7 +238,7 @@ _map_positions(op::GateOp, m::Vector{Int}) =
     GateOp(op.gate, Int[m[q+1] for q in op.qubits], op.params)
 _map_positions(op::MeasOp, m::Vector{Int}) =
     MeasOp(Int[m[q+1] for q in op.qubits], op.clbits)
-_map_positions(op::ResetOp, m::Vector{Int}) = ResetOp(Int[m[q+1] for q in op.qubits])
+_map_positions(op::ReinitOp, m::Vector{Int}) = ReinitOp(Int[m[q+1] for q in op.qubits])
 _map_positions(op::BarrierOp, m::Vector{Int}) = BarrierOp(Int[m[q+1] for q in op.qubits])
 _map_positions(op::ChannelOp, m::Vector{Int}) = ChannelOp(op.channel, Int[m[q+1] for q in op.qubits])
 _map_positions(op::IfOp, m::Vector{Int}) =

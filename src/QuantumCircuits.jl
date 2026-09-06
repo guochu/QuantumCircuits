@@ -39,11 +39,9 @@ export Gate, ConstGate, ParamGate, UserGate,
 export pow, ctrl, negctrl            # inv 直接扩展 Base.inv，无需再导出
 
 # ── 操作 ──
-export Operation, GateOp, MeasOp, ResetOp, BarrierOp, ChannelOp, IfOp, BlockOp,
-       measure, measure_all!, barrier, block,
-       unroll, unroll!, assign, assign!
-# 注意：`reset` 与 Base 导出的 `reset` 同名（行为不同），不导出；
-# 使用时请 `import QuantumCircuits: reset` 或显式限定。
+export Operation, GateOp, MeasOp, ReinitOp, BarrierOp, ChannelOp, IfOp, BlockOp,
+       measure, measure_all!, barrier, block, reinit,
+       unroll, unroll!, assign, assign!, draw
 
 # ── 信道 ──
 export Channel, KrausChannel, PauliChannel, UnitaryChannel,
@@ -72,11 +70,12 @@ include("bits.jl")
 include("params.jl")
 include("gates.jl")        # Gate 抽象 + 门库单例
 include("channels.jl")     # 信道类型 + kraus + 噪声指令构造
-include("ops.jl")          # Operation + GateOp/MeasOp/ResetOp/BarrierOp/ChannelOp
+include("ops.jl")          # Operation + GateOp/MeasOp/ReinitOp/BarrierOp/ChannelOp
 include("modifiers.jl")    # inv / pow / ctrl / negctrl
 include("circuit.jl")      # Circuit + DSL + 分析 + 绑参
 include("classical.jl")    # Cond + IfOp + if_then
-include("composite.jl")    # UserGate + BlockOp + flatten + 矩阵嵌入
+include("composite.jl")    # UserGate + BlockOp + unroll + 矩阵嵌入
+include("draw.jl")         # 线路文本图（draw）
 include("dag.jl")          # 依赖 DAG
 include("hamiltonian.jl")  # 子模块 Hamiltonian
 include("io/io.jl")        # to_qasm / write_qasm / read_qasm + 共享工具

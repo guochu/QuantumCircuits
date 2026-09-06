@@ -123,7 +123,7 @@ function _qasm3_op!(io::IO, op::Operation, qoff, coff)
             _qasm_bit(io, qoff, q)
         end
         println(io, ";")
-    elseif op isa ResetOp
+    elseif op isa ReinitOp
         for q in op.qubits
             print(io, "reset ")
             _qasm_bit(io, qoff, q)

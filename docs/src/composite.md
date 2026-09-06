@@ -48,7 +48,7 @@ unroll!(c)            # 就地递归展开线路中所有 BlockOp（含 IfOp 分
 ```
 
 - `mapping === nothing` 时操作原样复制；否则逐操作重映射比特
-  （`GateOp` / `MeasOp` / `ResetOp` / `BarrierOp` / `ChannelOp` / `IfOp` / 嵌套 `BlockOp`）；
+  （`GateOp` / `MeasOp` / `ReinitOp` / `BarrierOp` / `ChannelOp` / `IfOp` / 嵌套 `BlockOp`）；
 - `UserGate` 属于定义层（门），**不**被 `unroll!` 展开。
 
 ## 4. 分工速查

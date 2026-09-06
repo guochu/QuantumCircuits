@@ -30,6 +30,13 @@ Modules = [QuantumCircuits]
 Pages = ["ops.jl", "channels.jl"]
 ```
 
+## 线路图（draw）
+
+```@autodocs
+Modules = [QuantumCircuits]
+Pages = ["draw.jl"]
+```
+
 ## 线路
 
 ```@autodocs

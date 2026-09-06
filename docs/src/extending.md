@@ -53,3 +53,27 @@ QuantumCircuits.qubits(op::Relocate) = op.qubits
 - [约定](conventions.md#4-把-k-比特门矩阵转换成-2k-阶张量) 的矩阵↔张量转换公式
   是态矢/张量网络内核的实现依据；
 - `Param` 未绑定时 `mat` 报错——后端可自行按 `parameters(op)` 顺序接数值参数。
+
+## 5. 包扩展：Luxor 图形后端
+
+本包按 Julia 1.9+ 包扩展机制提供图形渲染（`Project.toml` 的 `[weakdeps]`/`[extensions]`）：
+
+- 不安装 Luxor 时，`draw`（文本图）始终可用；
+- `using Luxor` 后，扩展模块 `QuantumCircuitsLuxorExt` 自动加载，提供：
+
+| 函数 | 说明 |
+|---|---|
+| `plot(c; format=:svg)` | 返回 SVG 字符串（`filename=...` 时保存文件，按扩展名支持 `svg`/`png`/`pdf`） |
+| `save_plot(c, "file.svg")` | 保存到文件 |
+
+扩展通过 `Base.get_extension(QuantumCircuits, :QuantumCircuitsLuxorExt)` 访问；
+`plot` / `save_plot` 由扩展模块导出，用法：
+
+```julia
+using QuantumCircuits, Luxor
+ext = Base.get_extension(QuantumCircuits, :QuantumCircuitsLuxorExt)
+ext.save_plot(c, "bell.svg")   # 矢量图，可嵌入网页 / LaTeX（svg→pdf）
+```
+
+图形后端复用文本图 `draw` 的同一布局（`_layout` 列模型），
+新增门样式时两边一起改。
