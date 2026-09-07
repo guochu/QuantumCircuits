@@ -73,7 +73,7 @@ function plot(c::QuantumCircuits.Circuit;
     setfont("monospace", 12)
     setcolor("#444444")
     for r in 1:nq
-        settext("q$r", Point(margin, y(r)); halign="right", valign="center")
+        settext("q[$r]", Point(margin, y(r)); halign="right", valign="center")
     end
     for r in c.cregs, j in 1:r.n
         settext(string(r.name, "[", j, "]"), Point(margin, y(nq + coff[r.name] + j)); halign="right", valign="center")

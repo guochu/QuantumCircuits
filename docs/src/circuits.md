@@ -84,7 +84,7 @@ c.layout = Layout([5, 7, 9], nothing)   # initial: 线路比特 → 设备比特
 
 ```julia
 julia> print(draw(c))
-q1: ─H──●─
-     │
-q2: ────X─
+q[1]: ─H──●─
+      │
+q[2]: ────X─
 ```

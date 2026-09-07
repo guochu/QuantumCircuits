@@ -87,9 +87,9 @@ push!(noisy, PauliError(2, (1e-3, 1e-3, 2e-3)))
 ```julia
 julia> c = Circuit(2); push!(c, H(1)); push!(c, CX(1, 2))
 julia> draw(c)
-q1: ─H──●─
-     │
-q2: ────X─
+q[1]: ─H──●─
+      │
+q[2]: ────X─
 ```
 
 图形输出由**包扩展**提供——安装并加载

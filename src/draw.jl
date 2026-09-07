@@ -4,9 +4,9 @@
 # `draw(c)` 把线路渲染为文本图（类似 Qiskit 的 text drawer）：
 #
 #     julia> print(draw(c))
-#     q1: ──●──────
-#           │
-#     q2: ──X──[H]─
+#     q[1]: ──●──────
+#            │
+#     q[2]: ──X──[H]─
 #
 # 布局模型：每个操作占一列（`_DrawColumn`），列内记录各线上的符号（`_DrawCell`）
 # 与连线跨度 [lo, hi]；`_layout` 先 `unroll!` 展开 BlockOp，再逐操作建列。
@@ -202,9 +202,9 @@ julia> c = Circuit(2)
 julia> push!(c, H(1))
 julia> push!(c, CX(1, 2))
 julia> print(draw(c))
-q1: ─H──●─
-     │
-q2: ────X─
+q[1]: ─H──●─
+      │
+q[2]: ────X─
 ```
 """
 function draw(c::Circuit; ascii::Bool=false)
@@ -235,7 +235,7 @@ function draw(c::Circuit; ascii::Bool=false)
 
     prefixes = String[]
     for i in 1:nq
-        push!(prefixes, "q$i: ")
+        push!(prefixes, "q[$i]: ")
     end
     for r in c.cregs, j in 1:r.n
         push!(prefixes, string(r.name, "[", j, "]: "))
