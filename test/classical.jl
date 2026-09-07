@@ -14,7 +14,7 @@
     @test length(clbits(c.ops[1])) == 2
     # else 分支
     c2 = Circuit(2)
-    if_then(c2, c2.cregs[1] == 0, Circuit([X(0)]); otherwise=Circuit([Z(0)]))
+    if_then(c2, c2.cregs[1] == 0, Circuit([X(1)]); otherwise=Circuit([Z(1)]))
     op = c2.ops[1]
     @test op.otherwise !== nothing
     @test validate(c2) === c2

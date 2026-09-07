@@ -27,7 +27,7 @@
     push!(c4, X(1))
     @test num_ops(c) == 5 && num_ops(c4) == 6
     # 由操作向量构造（推断 n）
-    c5 = Circuit([X(0), CX(0, 1)])
+    c5 = Circuit([X(1), CX(1, 2)])
     @test c5.n == 2
 end
 
@@ -63,28 +63,28 @@ end
 
 @testset "analysis" begin
     c = Circuit(3)
-    push!(c, H(0))
     push!(c, H(1))
-    push!(c, CX(0, 1))
-    push!(c, measure(2, c.cregs[1][1]))
+    push!(c, H(2))
+    push!(c, CX(1, 2))
+    push!(c, measure(3, c.cregs[1][1]))
     @test depth(c) == 2
     @test count_ops(c) == Dict(:H => 2, :CX => 1, :measure => 1)
     @test num_ops(c) == 4
-    @test qubits_used(c) == [0, 1, 2]
+    @test qubits_used(c) == [1, 2, 3]
     @test validate(c) === c
     # dagger：纯酉线路
     c2 = Circuit(3)
-    push!(c2, H(0)); push!(c2, CX(0, 2)); push!(c2, RZ(0.4, 1))
+    push!(c2, H(1)); push!(c2, CX(1, 3)); push!(c2, RZ(0.4, 2))
     dg = dagger(c2)
     @test length(dg) == 3
-    @test dg.ops[1] == GateOp(InvGate(RZ), [1], [0.4])
-    @test dg.ops[3] == GateOp(InvGate(H), [0], [])
+    @test dg.ops[1] == GateOp(InvGate(RZ), [2], [0.4])
+    @test dg.ops[3] == GateOp(InvGate(H), [1], [])
     @test approxeq(_compose_unitary(dg) * _compose_unitary(c2), Matrix{ComplexF64}(I, 8, 8); tol=1e-8)
     # 含测量的线路不可逆
     @test_throws ErrorException dagger(c)
     # validate 越界
     bad = Circuit(1)
-    push!(bad, X(1))
+    push!(bad, X(2))
     @test_throws ArgumentError validate(bad)
     # measure_all!
     c3 = Circuit(3)

@@ -25,13 +25,13 @@ AmplitudeDamping(q, γ)            # 振幅阻尼
 PhaseDamping(q, γ)                # 相位阻尼
 KrausOp(ch, qubits)               # 任意信道定位
 
-push!(c, Depolarizing([0, 1], 1e-3))
+push!(c, Depolarizing([1, 2], 1e-3))
 ```
 
 ## 3. 属性
 
 ```julia
-op = PauliError(1, (0.001, 0.001, 0.002))
+op = PauliError(2, (0.001, 0.001, 0.002))
 op isa ChannelOp        # true
 qubits(op)              # [1]
 kraus(op)               # Kraus 算子集

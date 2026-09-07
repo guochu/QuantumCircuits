@@ -3,75 +3,81 @@
 本页是 QuantumCircuits.jl 的**底层约定**，是理解所有其他文档（以及编写模拟器/编译器后端）的前提。
 这些约定写死在接口里，全栈各包共用，**不随版本改变**。
 
+> **v0.2 变更**：比特索引由 0-based 改为 **1-based**（与 Julia 惯例一致），
+> 详见仓库根目录 `changes.md`。
+
 ---
 
-## 1. 比特索引：0-based
+## 1. 比特索引：1-based
 
 ### 量子比特（Qubit）
 
-- 量子比特用 **0-based** 的全局整数索引表示：一个 `n` 比特线路的合法索引是 `0, 1, …, n-1`。
+- 量子比特用 **1-based** 的全局整数索引表示：一个 `n` 比特线路的合法索引是 `1, 2, …, n`。
 - `Qubit` 只是这个整数的轻量包装：
 
 ```julia
-julia> Qubit(0)
-q[0]
+julia> Qubit(1)
+q[1]
 ```
 
 ### 经典位（ClbitRef）
 
-- 经典位与量子比特相同，**0-based**（显示与 QASM 导出均按 0-based）。
-- `ClbitRef` 内部记录 `(寄存器, 1-based 下标)`，`show` 输出 0-based 形式：
+- 经典位与量子比特相同，**1-based**（显示与 QASM 导出自动换算）。
+- `ClbitRef` 内部记录 `(寄存器, 1-based 下标)`：
 
 ```julia
 julia> c = CReg(:c, 2);
 
 julia> c[1]
-c[0]          # 寄存器第 1 位（Julia 1-based），显示为 0-based
+c[1]          # 寄存器第 1 位
 ```
 
-### 寄存器取下标：Julia 风格 1-based
+### 寄存器取下标：与比特编号一致
 
-寄存器本身是 Julia 对象，**取下标遵循 Julia 惯例（1-based）**，但取出的 `Qubit` 是 0-based 全局索引：
+寄存器是 Julia 对象，取下标即得到对应全局比特：
 
 ```julia
 julia> q = QReg(:q, 4);
 
-julia> q[1]          # Julia 1-based
-q[0]                 # 量子比特是 0-based
+julia> q[1]          # 第 1 个比特
+q[1]
 
 julia> q[4]          # 第 4 个比特
-q[3]
+q[4]
 
 julia> q[1:2]        # 区间同理
 2-element Vector{Qubit}:
- q[0]
  q[1]
+ q[2]
 ```
 
 ### 与 OpenQASM 交互时
 
-OpenQASM 规范本身使用 0-based 寄存器下标。因此：
+OpenQASM 规范本身使用 0-based 寄存器下标。IO 层**自动完成换算**，
+内部表示不暴露 0-based 索引：
 
 | 场景 | 索引起点 |
 |---|---|
-| `Qubit` / `Circuit` 操作中的比特参数 | 0-based |
-| `QReg` / `CReg` 的 Julia 取下标 | 1-based（返回 0-based 值） |
-| QASM 导出/导入的 `q[i]`、`c[i]` | 0-based（QASM 规范） |
+| `Qubit` / `Circuit` 操作中的比特参数 | **1-based** |
+| `QReg` / `CReg` 的 Julia 取下标 | 1-based（与比特编号一致） |
+| QASM 导出/导入的 `q[i]`、`c[i]` | 0-based（QASM 规范，自动换算） |
+
+例如内部比特 `1` 导出为 QASM `q[0]`；QASM `q[0]` 读入为内部比特 `1`。
 
 ---
 
 ## 2. 比特排序：小端序（little-endian）
 
-**qubit 0 = 最低有效位（LSB）**，与 Qiskit 一致。
+**qubit 1 = 最低有效位（LSB）**，与 Qiskit 的编号平移约定一致。
 
-一个 `n` 比特寄存器的计算基态记作 `|b_{n-1} … b_1 b_0⟩`，态矢下标为
+一个 `n` 比特寄存器的计算基态记作 `|b_n … b_2 b_1⟩`，态矢下标为
 
 ```
-s = b_0·2⁰ + b_1·2¹ + … + b_{n-1}·2^{n-1}
+s = b_1·2⁰ + b_2·2¹ + … + b_n·2^{n-1}
 ```
 
 即：**qubit 编号越小，在态矢下标里权重越低**。例如 2 比特态矢的下标
-`1 = 0b01` 表示 `|q₁=0, q₀=1⟩`。
+`1 = 0b01` 表示 `|q₂=0, q₁=1⟩`。
 
 配套约定：
 
@@ -106,7 +112,7 @@ julia> mat(CX)
  0.0  0.0  1.0  0.0
 ```
 
-`CX(0, 1)`（控制 = 比特 0，目标 = 比特 1）的矩阵下标分解
+`CX(1, 2)`（控制 = 比特 1，目标 = 比特 2）的矩阵下标分解
 （行 = 输出，列 = 输入；`c` = 控制位值，`t` = 目标位值）：
 
 ```
@@ -132,6 +138,7 @@ M[ Σⱼ iⱼ·2^{k-j} + 1 ,  Σⱼ jⱼ·2^{k-j} + 1 ]      （Julia 1-based）
 
 模拟器（尤其张量网络/态矢内核）常把 `2^k × 2^k` 的门矩阵视为 `2^{2k}` 阶张量。
 本节给出**确切的转换公式**，与 `mat` 的约定逐元素对应。
+（本节的 `i`、`j` 是**比特值** 0/1，与比特编号无关。）
 
 ### 数学定义
 
@@ -197,12 +204,12 @@ M = reshape(permutedims(𝒯, invperm(vcat(k:-1:1, 2k:-1:(k+1)))), 1 << k, 1 << 
 
 ### 与寄存器小端序的关系
 
-把门"嵌入" `n` 比特寄存器时遵循小端序（qubit 0 = 最低位）：内部工具
+把门"嵌入" `n` 比特寄存器时遵循小端序（qubit 1 = 最低位）：内部工具
 `QuantumCircuits._embed(M, qs, n)` 把 `k` 比特门矩阵（`qs[1]` 为矩阵最高位）映射到
-`n` 比特态矢空间。例如 `H` 作用在 qubit 1（2 比特寄存器）上等价于 `kron(I, H)`——
-因为 qubit 1 的权重（2¹）比 qubit 0（2⁰）高，所以 `H` 因子在 `kron` 的左侧。
+`n` 比特态矢空间。例如 `H` 作用在 qubit 2（2 比特寄存器）上等价于 `kron(H, I)`——
+因为 qubit 2 的权重（2¹）比 qubit 1（2⁰）高，所以 `H` 因子在 `kron` 的左侧。
 
-Hamiltonian 子模块的 `mat` 使用同一端序：`PauliTerm(1.0, 0=>:X)` 在 2 比特空间展开为
+Hamiltonian 子模块的 `mat` 使用同一端序：`PauliTerm(1.0, 1=>:X)` 在 2 比特空间展开为
 `kron(I, X)`。
 
 ---
@@ -223,6 +230,6 @@ Hamiltonian 子模块的 `mat` 使用同一端序：`PauliTerm(1.0, 0=>:X)` 在 
 
 - 命名：类型 PascalCase、函数 snake_case、`!` 后缀表示就地修改；
 - `Circuit(n)` 默认带寄存器 `q`（量子）与 `c`（经典），尺寸均为 `n`；
-- `BlockOp` 的 `mapping[i+1]` 给出 body 局部比特 `i`（0-based）的全局位置；
+- `BlockOp` 的 `mapping[i]` 给出 body 局部比特 `i`（1-based，`1 ≤ i ≤ k`）的全局位置；
 - 经典位作用域全局共享：`BlockOp` / `IfOp` 内直接引用父线路的 `CReg`；
 - 本包**不定义执行语义**：`mat` 只描述酉操作的矩阵，`apply!` 属于模拟器后端。

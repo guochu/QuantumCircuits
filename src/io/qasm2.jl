@@ -53,13 +53,13 @@ end
 "寄存器名 → (全局偏移, 尺寸)。"
 function _qasm_reg_offsets(regs::Vector{QReg}, n::Int)
     m = Dict{Symbol,Tuple{Int,Int}}()
-    off = 0
+    off = 1
     for r in regs
         haskey(m, r.name) && throw(ArgumentError("duplicate qreg name $(r.name)"))
         m[r.name] = (off, r.n)
         off += r.n
     end
-    off == n || throw(ArgumentError("qreg sizes ($off) must sum to circuit size ($n) for QASM export"))
+    off - 1 == n || throw(ArgumentError("qreg sizes ($(off - 1)) must sum to circuit size ($n) for QASM export"))
     return m
 end
 
@@ -252,7 +252,7 @@ function _parse_decl!(st::_QASMParseState, stmt::AbstractString, isq::Bool)
     nm = Symbol(m[2])
     if isq
         haskey(st.qmap, nm) && throw(ArgumentError("duplicate qreg $nm"))
-        st.qmap[nm] = (st.nq, n)
+        st.qmap[nm] = (st.nq + 1, n)     # 内部 1-based 起始编号
         push!(st.qregs, QReg(nm, n))
         st.nq += n
     else
@@ -304,13 +304,13 @@ function _resolve_one_operand(st::_QASMParseState, a::AbstractString)
     haskey(st.qmap, nm) || throw(ArgumentError("unknown qubit register \"$nm\""))
     off, n = st.qmap[nm]
     if m[2] === nothing
-        return Vector{Int}[[off + i] for i in 0:n-1]
+        return Vector{Int}[[off + i] for i in 0:n-1]   # off 为内部 1-based 起始号
     end
     idx = _parse_expr(m[2])
     isinteger(idx) || throw(ArgumentError("qubit index must be an integer: $a"))
     idx = Int(idx)
     0 <= idx < n || throw(ArgumentError("qubit index out of range: $a"))
-    return Vector{Int}[[off + idx]]
+    return Vector{Int}[[off + idx]]   # QASM 0-based 索引 → 内部 1-based
 end
 
 "barrier 操作数：整寄存器展开进同一个 barrier。"

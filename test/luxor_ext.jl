@@ -6,9 +6,9 @@ using Luxor
     @test ext !== nothing
 
     c = Circuit(2)
-    push!(c, H(0))
-    push!(c, CX(0, 1))
-    push!(c, measure(0, c.cregs[1][1]))
+    push!(c, H(1))
+    push!(c, CX(1, 2))
+    push!(c, measure(1, c.cregs[1][1]))
 
     # SVG 字符串输出（注意：Luxor 将文字转为矢量 glyph，不包含字面字符）
     s = ext.plot(c)

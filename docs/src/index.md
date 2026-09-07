@@ -20,35 +20,35 @@ using QuantumCircuits
 
 # ── Bell 态 + 测量 ──────────────────────────────
 c = Circuit(2)
-push!(c, H(0))                     # 门调用即定位：H(0) ⇒ GateOp(H, [0])
-push!(c, CX(0, 1))                 # 控制 = 比特 0，目标 = 比特 1
-push!(c, measure([0, 1], c.cregs[1][1:2]))
+push!(c, H(1))                     # 门调用即定位：H(1) ⇒ GateOp(H, [1])
+push!(c, CX(1, 2))                 # 控制 = 比特 1，目标 = 比特 2
+push!(c, measure([1, 2], c.cregs[1][1:2]))
 print(to_qasm(c))                  # 导出 OpenQASM 3
 
 # ── 变分线路（符号参数）─────────────────────────
 c = Circuit(4)
 φ = params(:φ, 3)
-for q in 0:3
+for q in 1:4
     push!(c, RX(:θ, q))            # Symbol 自动提升为 Param
 end
-for q in 0:2
-    push!(c, RZZ(φ[q+1], q, q+1))  # φ[i] 各自独立
+for q in 1:3
+    push!(c, RZZ(φ[q], q, q+1))    # φ[i] 各自独立
 end
 parameters(c)                      # 收集符号参数（去重、按出现序）
 bound = assign(c, Dict(:θ => 0.3, φ => [π/4, 0.5, 0.2]))
 
 # ── QEC 综合征轮：块 + 重复 ─────────────────────
 round_i = Circuit(5, cregs=[CReg(:syn, 2)])
-push!(round_i, CX(0, 4)); push!(round_i, CX(2, 4))
+push!(round_i, CX(1, 5)); push!(round_i, CX(3, 5))
 if_then(round_i, round_i.cregs[1][1] == 1, Circuit([X(1)]))
 syn = Circuit(5)
 push!(syn, block(round_i; name=:syndrome_round, repeat=5))
 
 # ── 含噪线路（噪声即指令）───────────────────────
 noisy = Circuit(2)
-push!(noisy, H(0)); push!(noisy, CX(0, 1))
-push!(noisy, Depolarizing([0, 1], 1e-3))
-push!(noisy, PauliError(1, (1e-3, 1e-3, 2e-3)))
+push!(noisy, H(1)); push!(noisy, CX(1, 2))
+push!(noisy, Depolarizing([1, 2], 1e-3))
+push!(noisy, PauliError(2, (1e-3, 1e-3, 2e-3)))
 ```
 
 ## 可视化

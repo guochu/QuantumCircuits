@@ -8,7 +8,7 @@ using QuantumCircuits.Hamiltonian
 
 ```julia
 PauliTerm(1.0, 1=>:Z, 2=>:X)      # 1.0 · Z₁ ⊗ X₂
-PauliTerm(0=>:X)                   # 系数默认 1.0
+PauliTerm(1=>:X)                   # 系数默认 1.0
 ```
 
 - 位置**自动升序排序**；同 qubit 重复项自动相乘合并（`X·X → I`，`X·Y → iZ`）；
@@ -18,8 +18,8 @@ PauliTerm(0=>:X)                   # 系数默认 1.0
 ## 2. PauliSum：厄米算符 = Pauli 项之和
 
 ```julia
-h = PauliTerm(1.0, 0=>:Z) + PauliTerm(2.0, 1=>:X)
-h = PauliSum([PauliTerm(1.0, 0=>:Z), PauliTerm(0.5, 1=>:X)])
+h = PauliTerm(1.0, 1=>:Z) + PauliTerm(2.0, 2=>:X)
+h = PauliSum([PauliTerm(1.0, 1=>:Z), PauliTerm(0.5, 2=>:X)])
 ```
 
 - `+` / `-` 自动**合并同类项**、去掉零系数项（保持首次出现顺序）；
@@ -33,7 +33,7 @@ mat(h::PauliSum, n::Int)   # → Matrix（稠密，2^n × 2^n）
 mat(t::PauliTerm, n::Int)  # 单项同样支持
 ```
 
-- **小端序**：qubit 0 = 最低有效位，即 `PauliTerm(1.0, 0=>:X)` 在 2 比特空间为
+- **小端序**：qubit 1 = 最低有效位，即 `PauliTerm(1.0, 1=>:X)` 在 2 比特空间为
   `kron(I₂, X)`；
 - 输出为**稠密矩阵**，元素类型随系数与 Pauli 串自然提升
   （全实项 ⇒ `Matrix{Float64}`，含 `:Y` 或复系数 ⇒ `ComplexF64`）；
@@ -43,7 +43,7 @@ mat(t::PauliTerm, n::Int)  # 单项同样支持
 
 ```julia
 h = -0.810547980537326 * PauliSum([]) +
-     0.172183932619155 * PauliTerm(1.0, 0=>:Z) +
+     0.172183932619155 * PauliTerm(1.0, 1=>:Z) +
      ...
 ```
 

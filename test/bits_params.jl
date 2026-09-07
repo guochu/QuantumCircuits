@@ -1,8 +1,8 @@
 @testset "bits" begin
     q = QReg(:q, 4)
-    @test q[1] == Qubit(0)
-    @test q[4] == Qubit(3)
-    @test q[1:2] == [Qubit(0), Qubit(1)]
+    @test q[1] == Qubit(1)
+    @test q[4] == Qubit(4)
+    @test q[1:2] == [Qubit(1), Qubit(2)]
     @test_throws BoundsError q[5]
     c = CReg(:c, 2)
     @test c[1] isa ClbitRef

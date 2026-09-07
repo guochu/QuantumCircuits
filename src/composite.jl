@@ -11,12 +11,13 @@
 # =============================================================================
 
 # ── 矩阵嵌入工具（小端序） ───────────────────────────────────────────────────
-# 把 k 比特门矩阵 M（qs[1] 为矩阵最高位）嵌入 n 比特空间；qubit 0 为最低位。
+# 把 k 比特门矩阵 M（qs[1] 为矩阵最高位）嵌入 n 比特空间；
+# 比特号为 1-based（qubit 1 为最低位，内部位移时减 1）。
 
 _extract_bits(x::Int, qs::Vector{Int}, k::Int) = begin
     v = 0
     for j in 1:k
-        v = (v << 1) | ((x >> qs[j]) & 1)
+        v = (v << 1) | ((x >> (qs[j] - 1)) & 1)
     end
     v
 end
@@ -24,7 +25,7 @@ end
 _scatter_bits(v::Int, qs::Vector{Int}, k::Int) = begin
     x = 0
     for j in 1:k
-        x |= ((v >> (k - j)) & 1) << qs[j]
+        x |= ((v >> (k - j)) & 1) << (qs[j] - 1)
     end
     x
 end
@@ -32,7 +33,7 @@ end
 _clear_bits(x::Int, qs::Vector{Int}) = begin
     y = x
     for q in qs
-        y &= ~(1 << q)
+        y &= ~(1 << (q - 1))
     end
     y
 end
@@ -42,7 +43,7 @@ function _embed(M::AbstractMatrix, qs::Vector{Int}, n::Int)
     size(M) == (1 << k, 1 << k) ||
         throw(ArgumentError("matrix size $(size(M)) does not match $(k) qubits"))
     length(unique(qs)) == k || throw(ArgumentError("qubits must be distinct"))
-    all(q -> 0 <= q < n, qs) || throw(ArgumentError("qubit index out of range for n=$n"))
+    all(q -> 1 <= q <= n, qs) || throw(ArgumentError("qubit index out of range for n=$n"))
     d = 1 << n
     out = zeros(ComplexF64, d, d)
     for gcol in 0:d-1
@@ -83,8 +84,8 @@ struct UserGate{N,T<:Number} <: Gate
     function UserGate(name::Symbol, n::Integer, def::Circuit)
         all(is_unitary, def.ops) ||
             throw(ArgumentError("UserGate definition must be fully unitary; use BlockOp for non-unitary grouping"))
-        qmax = maximum(qubits_used(def); init=-1)
-        qmax < n || throw(ArgumentError("definition uses qubit $qmax beyond declared n=$n"))
+        qmax = maximum(qubits_used(def); init=0)
+        qmax <= n || throw(ArgumentError("definition uses qubit $qmax beyond declared n=$n"))
         new{Int(n),ComplexF64}(name, length(parameters(def)), nothing, def)
     end
 end
@@ -120,7 +121,7 @@ Base.:(==)(a::UserGate, b::UserGate) =
 结构块（定位层）：命名子线路 + 重复次数 + 局部→全局比特映射。
 
 * `mapping` 为 `nothing` 时，body 直接使用全局比特索引；
-* 否则 body 使用局部索引 0..k-1，`mapping[i+1]` 给出局部比特 i 的全局位置。
+* 否则 body 使用局部索引 1..k，`mapping[i]` 给出局部比特 i 的全局位置。
 * 经典位作用域全局共享：body 直接引用父线路的 CReg。
 * 依赖图中 BlockOp 以 qubit 足迹作为**原子节点**；需要细粒度时先 `flatten!`。
 """
@@ -133,10 +134,10 @@ struct BlockOp <: Operation
     function BlockOp(name::Symbol, body::Circuit, n::Integer, mapping::Union{Nothing,Vector{Int}})
         n >= 1 || throw(ArgumentError("repeat must be >= 1"))
         if mapping !== nothing
-            qmax = maximum(qubits_used(body); init=-1)
-            qmax < length(mapping) ||
+            qmax = maximum(qubits_used(body); init=0)
+            qmax <= length(mapping) ||
                 throw(ArgumentError("body uses local qubit $qmax beyond mapping size $(length(mapping))"))
-            all(q -> q >= 0, mapping) || throw(ArgumentError("mapping entries must be non-negative"))
+            all(q -> q >= 1, mapping) || throw(ArgumentError("mapping entries must be positive"))
         end
         new(name, body, Int(n), mapping)
     end
@@ -150,7 +151,7 @@ end
 function qubits(op::BlockOp)
     qs = qubits_used(op.body)
     op.mapping === nothing && return qs
-    return sort!(unique(Int[op.mapping[q+1] for q in qs]))
+    return sort!(unique(Int[op.mapping[q] for q in qs]))
 end
 
 function clbits(op::BlockOp)
@@ -183,13 +184,13 @@ function mat(op::BlockOp)
     is_unitary(op) || throw(ArgumentError("non-unitary block has no matrix"))
     span = qubits(op)                       # 升序全局足迹
     k = length(span)
-    rank = Dict{Int,Int}(q => i - 1 for (i, q) in enumerate(span))
+    rank = Dict{Int,Int}(q => i for (i, q) in enumerate(span))   # 1-based 局部位置
     M = Matrix{ComplexF64}(I, 1 << k, 1 << k)
     for o in op.body.ops
         if op.mapping === nothing
             pos = Int[rank[q] for q in qubits(o)]
         else
-            pos = Int[rank[op.mapping[q+1]] for q in qubits(o)]
+            pos = Int[rank[op.mapping[q]] for q in qubits(o)]
         end
         M = _embed(mat(o), pos, k) * M
     end
@@ -211,13 +212,13 @@ _assign_op(op::BlockOp, t::Dict{Param,Float64}) =
 _op_kind(::BlockOp) = :block
 
 function _validate_block(op::BlockOp)
-    bodymax = maximum(qubits_used(op.body); init=-1)
+    bodymax = maximum(qubits_used(op.body); init=0)
     if op.mapping === nothing
-        bodymax < op.body.n || throw(ArgumentError("block body uses qubit $bodymax beyond its size $(op.body.n)"))
+        bodymax <= op.body.n || throw(ArgumentError("block body uses qubit $bodymax beyond its size $(op.body.n)"))
     else
-        bodymax < length(op.mapping) ||
+        bodymax <= length(op.mapping) ||
             throw(ArgumentError("block body uses local qubit $bodymax beyond mapping size $(length(op.mapping))"))
-        all(q -> q >= 0, op.mapping) || throw(ArgumentError("block mapping entries must be non-negative"))
+        all(q -> q >= 1, op.mapping) || throw(ArgumentError("block mapping entries must be positive"))
     end
     return nothing
 end
@@ -235,19 +236,19 @@ function unroll(op::BlockOp)
 end
 
 _map_positions(op::GateOp, m::Vector{Int}) =
-    GateOp(op.gate, Int[m[q+1] for q in op.qubits], op.params)
+    GateOp(op.gate, Int[m[q] for q in op.qubits], op.params)
 _map_positions(op::MeasOp, m::Vector{Int}) =
-    MeasOp(Int[m[q+1] for q in op.qubits], op.clbits)
-_map_positions(op::ReinitOp, m::Vector{Int}) = ReinitOp(Int[m[q+1] for q in op.qubits])
-_map_positions(op::BarrierOp, m::Vector{Int}) = BarrierOp(Int[m[q+1] for q in op.qubits])
-_map_positions(op::ChannelOp, m::Vector{Int}) = ChannelOp(op.channel, Int[m[q+1] for q in op.qubits])
+    MeasOp(Int[m[q] for q in op.qubits], op.clbits)
+_map_positions(op::ReinitOp, m::Vector{Int}) = ReinitOp(Int[m[q] for q in op.qubits])
+_map_positions(op::BarrierOp, m::Vector{Int}) = BarrierOp(Int[m[q] for q in op.qubits])
+_map_positions(op::ChannelOp, m::Vector{Int}) = ChannelOp(op.channel, Int[m[q] for q in op.qubits])
 _map_positions(op::IfOp, m::Vector{Int}) =
     IfOp(op.cond, _map_circuit(op.then, m),
          op.otherwise === nothing ? nothing : _map_circuit(op.otherwise, m))
 _map_positions(op::BlockOp, m::Vector{Int}) = begin
     # 嵌套块：内层 mapping（内层局部 → 外层局部）再经 m（外层局部 → 全局）复合
     inner = op.mapping
-    combined = inner === nothing ? m : Int[m[inner[i]+1] for i in 1:length(inner)]
+    combined = inner === nothing ? m : Int[m[inner[i]] for i in 1:length(inner)]
     BlockOp(op.name, op.body, op.n, combined)
 end
 

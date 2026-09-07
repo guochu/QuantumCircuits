@@ -39,7 +39,7 @@ function Circuit(ops::Vector{<:Operation};
                  cregs::Union{Nothing,Vector{CReg}}=nothing,
                  layout::Layout=Layout())
     if n === nothing
-        n = isempty(ops) ? 0 : maximum(maximum(qubits(op); init=-1) for op in ops) + 1
+        n = isempty(ops) ? 0 : maximum(maximum(qubits(op); init=0) for op in ops)
     end
     qregs === nothing && (qregs = [QReg(:q, Int(n))])
     cregs === nothing && (cregs = [CReg(:c, Int(n))])
@@ -247,7 +247,7 @@ end
 function validate(c::Circuit)
     for op in c.ops
         for q in qubits(op)
-            0 <= q < c.n || throw(ArgumentError("qubit index $q out of range [0, $(c.n)) in $op"))
+            1 <= q <= c.n || throw(ArgumentError("qubit index $q out of range [1, $(c.n)] in $op"))
         end
         for cb in clbits(op)
             cb.reg in c.cregs ||
@@ -278,8 +278,8 @@ function measure_all!(c::Circuit)
         end
     end
     cr === nothing && throw(ArgumentError("no creg of size $(c.n); construct with cregs=[CReg(:c, $c.n)]"))
-    for q in 0:c.n-1
-        push!(c, measure(q, cr[q+1]))
+    for q in 1:c.n
+        push!(c, measure(q, cr[q]))
     end
     return c
 end

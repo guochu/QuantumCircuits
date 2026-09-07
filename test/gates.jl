@@ -63,5 +63,5 @@ end
     @test approxeq(_matrix_pow(X.matrix, 2.0), I2)
     # GateOp 层修饰
     @test inv(GateOp(S, [1])) == GateOp(InvGate(S), [1], [])
-    @test ctrl(CX(0, 1), 2).qubits == [2, 0, 1]
+    @test ctrl(CX(1, 2), 3).qubits == [3, 1, 2]
 end

@@ -59,7 +59,7 @@ const _PAULI_MUL = Dict{Tuple{Symbol,Symbol},Tuple{Symbol,ComplexF64}}(
 "单比特 Pauli 符号乘法：返回 (结果符号, 相位)。"
 _pauli_mul(a::Symbol, b::Symbol) = _PAULI_MUL[(a, b)]
 
-# 小端序：ps[1] 是最低有效位（qubit 0），kron 展开时排在最右。
+# 小端序：ps[1] 是最低有效位（qubit 1），kron 展开时排在最右。
 function _pauli_string_matrix(ps::Vector{Symbol})
     m = _PAULI1[ps[end]]
     for i in length(ps)-1:-1:1

@@ -14,7 +14,7 @@ QCCD 编译产物，共用这一种表示。
 5. **布局一等公民**：线路自带 `initial_layout / output_permutation`。
 6. **开放类型 + 小接口**：`Operation` 是抽象类型，下游只需实现最小协议
    （`qubits` / `clbits` / `is_unitary` / `mat`）。
-7. **约定**：小端序（qubit 0 = 最低有效位）；类型 PascalCase、函数 snake_case、
+7. **约定**：比特索引 1-based（与 Julia 惯例一致）、小端序（qubit 1 = 最低有效位）；类型 PascalCase、函数 snake_case、
    `!` 表示就地修改。
 8. **参数用符号**：门参数接受 `Real | Param | Symbol`，变分工作流先建线路后绑参。
 

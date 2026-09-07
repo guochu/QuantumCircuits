@@ -4,9 +4,9 @@
 # `draw(c)` 把线路渲染为文本图（类似 Qiskit 的 text drawer）：
 #
 #     julia> print(draw(c))
-#     q0: ──●──────
+#     q1: ──●──────
 #           │
-#     q1: ──X──[H]─
+#     q2: ──X──[H]─
 #
 # 布局模型：每个操作占一列（`_DrawColumn`），列内记录各线上的符号（`_DrawCell`）
 # 与连线跨度 [lo, hi]；`_layout` 先 `unroll!` 展开 BlockOp，再逐操作建列。
@@ -39,7 +39,7 @@ _touch!(col::_DrawColumn, wire::Int) =
 
 # ── 布局 ──────────────────────────────────────────────────────────────────────
 
-"线路的线映射：量子比特 q → 线 q+1；经典位按 cregs 声明顺序线性排布。"
+"线路的线映射：量子比特 q（1-based）→ 线 q；经典位按 cregs 声明顺序线性排布。"
 function _wire_maps(c::Circuit)
     coff = Dict{Symbol,Int}()
     off = 0
@@ -65,39 +65,39 @@ function _gate_column(op::GateOp)
         nb = nqubits(op.gate.g)
         k = length(qs) - nb
         for (j, cq) in enumerate(qs[1:k])
-            _setcell!(col, cq + 1, op.gate.negs[j] ? :negctrl : :ctrl)
+            _setcell!(col, cq, op.gate.negs[j] ? :negctrl : :ctrl)
         end
-        _setcell!(col, qs[k+1] + 1, :box, _gate_label(op.gate.g, op.params))
+        _setcell!(col, qs[k+1], :box, _gate_label(op.gate.g, op.params))
         for q in qs[k+2:end]
-            _touch!(col, q + 1)
+            _touch!(col, q)
         end
     elseif gname in (:SWAP, :ISWAP)
-        _setcell!(col, qs[1] + 1, :swap)
-        _setcell!(col, qs[2] + 1, :swap)
+        _setcell!(col, qs[1], :swap)
+        _setcell!(col, qs[2], :swap)
     elseif gname in (:RXX, :RZZ, :MS, :CPHASE)
         col.label = _gate_label(op.gate, op.params)
         for q in qs
-            _setcell!(col, q + 1, :ctrl)
+            _setcell!(col, q, :ctrl)
         end
     elseif gname in (:CX, :CY, :CZ, :CH)
-        _setcell!(col, qs[1] + 1, :ctrl)
-        _setcell!(col, qs[2] + 1, :box, string(gname)[2:2])
+        _setcell!(col, qs[1], :ctrl)
+        _setcell!(col, qs[2], :box, string(gname)[2:2])
     elseif gname == :CCX
-        _setcell!(col, qs[1] + 1, :ctrl)
-        _setcell!(col, qs[2] + 1, :ctrl)
-        _setcell!(col, qs[3] + 1, :box, "X")
+        _setcell!(col, qs[1], :ctrl)
+        _setcell!(col, qs[2], :ctrl)
+        _setcell!(col, qs[3], :box, "X")
     elseif gname == :CSWAP
-        _setcell!(col, qs[1] + 1, :ctrl)
-        _setcell!(col, qs[2] + 1, :swap)
-        _setcell!(col, qs[3] + 1, :swap)
+        _setcell!(col, qs[1], :ctrl)
+        _setcell!(col, qs[2], :swap)
+        _setcell!(col, qs[3], :swap)
     elseif gname in (:CRX, :CRY, :CRZ)
-        _setcell!(col, qs[1] + 1, :ctrl)
-        _setcell!(col, qs[2] + 1, :box, string("R", gname[3]) * _param_text(op.params))
+        _setcell!(col, qs[1], :ctrl)
+        _setcell!(col, qs[2], :box, string("R", gname[3]) * _param_text(op.params))
     else
         # 兜底：标签盒放首比特，其余比特用连线桥接
-        _setcell!(col, qs[1] + 1, :box, _gate_label(op.gate, op.params))
+        _setcell!(col, qs[1], :box, _gate_label(op.gate, op.params))
         for q in qs[2:end]
-            _touch!(col, q + 1)
+            _touch!(col, q)
         end
     end
     return col
@@ -106,7 +106,7 @@ end
 function _measure_column(op::MeasOp, nq::Int, coff::Dict{Symbol,Int})
     col = _DrawColumn()
     for (q, cb) in zip(op.qubits, op.clbits)
-        _setcell!(col, q + 1, :measure, "M")
+        _setcell!(col, q, :measure, "M")
         _setcell!(col, nq + coff[cb.reg.name] + cb.index, :cltarget)
     end
     return col
@@ -127,27 +127,27 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
     elseif op isa ReinitOp
         col = _DrawColumn()
         for q in op.qubits
-            _setcell!(col, q + 1, :box, "|0>")
+            _setcell!(col, q, :box, "|0>")
         end
         push!(cols, col)
     elseif op isa BarrierOp
         col = _DrawColumn()
         for q in op.qubits
-            _setcell!(col, q + 1, :barrier)
+            _setcell!(col, q, :barrier)
         end
         push!(cols, col)
     elseif op isa ChannelOp
         col = _DrawColumn()
         qs = qubits(op)
-        _setcell!(col, qs[1] + 1, :box, _channel_text(op.channel))
+        _setcell!(col, qs[1], :box, _channel_text(op.channel))
         for q in qs[2:end]
-            _touch!(col, q + 1)
+            _touch!(col, q)
         end
         push!(cols, col)
     elseif op isa IfOp
         col = _DrawColumn("if (" * string(op.cond) * ")")
         for q in qubits(op)
-            _setcell!(col, q + 1, :box, "IF")
+            _setcell!(col, q, :box, "IF")
         end
         for i in 1:length(op.cond.reg)
             _touch!(col, nq + coff[op.cond.reg.name] + i)
@@ -159,7 +159,7 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
         if op.otherwise !== nothing
             col2 = _DrawColumn("else")
             for q in qubits(op.otherwise)
-                _setcell!(col2, q + 1, :box, "ELSE")
+                _setcell!(col2, q, :box, "ELSE")
             end
             push!(cols, col2)
             for o in op.otherwise.ops
@@ -169,7 +169,7 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
     elseif op isa BlockOp
         col = _DrawColumn(op.n > 1 ? string(op.name, " ×", op.n) : string(op.name))
         for q in qubits(op)
-            _setcell!(col, q + 1, :box, string(op.name))
+            _setcell!(col, q, :box, string(op.name))
         end
         push!(cols, col)
     else
@@ -199,12 +199,12 @@ end
 
 ```julia
 julia> c = Circuit(2)
-julia> push!(c, H(0))
-julia> push!(c, CX(0, 1))
+julia> push!(c, H(1))
+julia> push!(c, CX(1, 2))
 julia> print(draw(c))
-q0: ─H──●─
+q1: ─H──●─
      │
-q1: ────X─
+q2: ────X─
 ```
 """
 function draw(c::Circuit; ascii::Bool=false)
@@ -235,10 +235,10 @@ function draw(c::Circuit; ascii::Bool=false)
 
     prefixes = String[]
     for i in 1:nq
-        push!(prefixes, "q$(i-1): ")
+        push!(prefixes, "q$i: ")
     end
     for r in c.cregs, j in 1:r.n
-        push!(prefixes, string(r.name, "[", j - 1, "]: "))
+        push!(prefixes, string(r.name, "[", j, "]: "))
     end
     maxp = maximum(textwidth, prefixes; init=0)
 

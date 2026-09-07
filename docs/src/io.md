@@ -56,7 +56,7 @@ u1（=PHASE）cu1（=CPHASE）rxx rzz rz（=VirtualZ）`、`measure`、`reset`�
 
 - 导出要求 `qregs` 尺寸之和恰为 `nqubits(c)`（寄存器按声明顺序线性切分全局比特）；
 - 导入按声明顺序为寄存器分配全局比特区间；
-- QASM 侧寄存器下标一律 **0-based**。
+- QASM 侧寄存器下标一律 **0-based**（QASM 规范）；包内比特为 1-based，读写时自动换算。
 
 ## 5. 参数
 

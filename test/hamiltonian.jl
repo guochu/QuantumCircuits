@@ -3,27 +3,27 @@
     @test t1.ops == [1=>:Z, 2=>:X]          # 位置自动排序
     @test t1 isa PauliTerm{Float64}          # 实系数保持实类型
     # 同 qubit 合并：X·X = I
-    @test PauliTerm(1.0, 0=>:X, 0=>:X).ops == Pair{Int,Symbol}[]
+    @test PauliTerm(1.0, 1=>:X, 1=>:X).ops == Pair{Int,Symbol}[]
     # Pauli 代数：X·Y = iZ（相位使系数提升为复数）
-    xy = PauliTerm(1.0, 0=>:X) * PauliTerm(1.0, 0=>:Y)
-    @test xy.coeff ≈ im && xy.ops == [0=>:Z]
+    xy = PauliTerm(1.0, 1=>:X) * PauliTerm(1.0, 1=>:Y)
+    @test xy.coeff ≈ im && xy.ops == [1=>:Z]
     @test xy isa PauliTerm{ComplexF64}
-    yx = PauliTerm(1.0, 0=>:Y) * PauliTerm(1.0, 0=>:X)
+    yx = PauliTerm(1.0, 1=>:Y) * PauliTerm(1.0, 1=>:X)
     @test yx.coeff ≈ -im
     # 加法合并同类项
-    s = PauliTerm(1.0, 0=>:Z) + PauliTerm(2.0, 0=>:Z) + PauliTerm(1.0, 1=>:X)
+    s = PauliTerm(1.0, 1=>:Z) + PauliTerm(2.0, 1=>:Z) + PauliTerm(1.0, 2=>:X)
     @test length(s.terms) == 2
     # 矩阵展开（小端序）：qubit 0 = 最低位 → kron(P_1, P_0)；全实项 ⇒ 实矩阵
-    m = mat(PauliSum([PauliTerm(1.0, 0=>:X)]), 2)
+    m = mat(PauliSum([PauliTerm(1.0, 1=>:X)]), 2)
     @test m isa Matrix{Float64}
     @test approxeq(Matrix(m), kron(I2, mat(X)))
-    m2 = mat(PauliSum([PauliTerm(1.0, 1=>:Z, 0=>:X)]), 2)
+    m2 = mat(PauliSum([PauliTerm(1.0, 2=>:Z, 1=>:X)]), 2)
     @test approxeq(Matrix(m2), kron(mat(Z), mat(X)))
     # 单项展开
-    mt = mat(PauliTerm(2.0, 1=>:Z, 0=>:X), 2)
+    mt = mat(PauliTerm(2.0, 2=>:Z, 1=>:X), 2)
     @test mt isa Matrix{Float64}
     @test approxeq(mt, 2 * kron(mat(Z), mat(X)))
-    mc = mat(PauliTerm(1.0, 0=>:Y), 1)
+    mc = mat(PauliTerm(1.0, 1=>:Y), 1)
     @test mc isa Matrix{ComplexF64}
     @test approxeq(mc, mat(Y))
     # 乘法分配

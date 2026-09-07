@@ -8,7 +8,7 @@
 ug = UserGate(:mygate, [0 1; 1 0])     # 矩阵定义（糖：usergate(:mygate, m)）
 ug(3)                                  # 像普通门一样调用定位
 
-def = Circuit([H(0), CX(0, 1)])
+def = Circuit([H(1), CX(1, 2)])
 bell = UserGate(:bell, 2, def)         # 子线路定义（延迟分解）
 mat(bell)                              # 首次求矩阵时展开合成
 ```
@@ -31,7 +31,7 @@ blk = block(body; name=:round, repeat=3, at=[3, 4])
 | `name` | 块名（可视化显示为单个命名框） |
 | `body` | 子线路 |
 | `n` | 重复次数（QEC 综合征轮次 / Trotter 步） |
-| `mapping` | `at`：`mapping[i+1]` = body 局部比特 `i`（0-based）的全局位置；`nothing` 时 body 直接用全局比特 |
+| `mapping` | `at`：`mapping[i]` = body 局部比特 `i`（1-based）的全局位置；`nothing` 时 body 直接用全局比特 |
 
 要点：
 

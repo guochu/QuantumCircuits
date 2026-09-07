@@ -178,21 +178,21 @@ function mat(t::PauliTerm, n::Int)
 end
 
 """
-展开为 `n` 比特空间的 `2^n × 2^n` **稠密**矩阵（小端序：qubit 0 = 最低有效位）。
+展开为 `n` 比特空间的 `2^n × 2^n` **稠密**矩阵（小端序：qubit 1 = 最低有效位）。
 结果元素类型随系数与 Pauli 串自然提升（全实项 ⇒ 实矩阵）。
 """
 function mat(h::PauliSum{T}, n::Int) where {T}
     d = 1 << n
     M = zeros(T, d, d)
     for t in h.terms
-        M = M + t.coeff * mat(t, n)
+        M = M + mat(t, n)   # mat(t, n) 已含系数 t.coeff
     end
     return M
 end
 
 function _kron_term(ops::Vector{Pair{Int,Symbol}}, n::Int)
     for (q, _) in ops
-        0 <= q < n || throw(ArgumentError("qubit $q out of range for n=$n"))
+        1 <= q <= n || throw(ArgumentError("qubit $q out of range for n=$n"))
     end
     T = Float64
     for (q, s) in ops
@@ -200,9 +200,9 @@ function _kron_term(ops::Vector{Pair{Int,Symbol}}, n::Int)
     end
     factors = Matrix{T}[_P[:I] for _ in 1:n]
     for (q, s) in ops
-        factors[q+1] = convert(Matrix{T}, _P[s])
+        factors[q] = convert(Matrix{T}, _P[s])
     end
-    # 小端序：qubit 0 = 最低有效位 → 最高位因子在最左；kron(A, B) 中 A 更显著
+    # 小端序：qubit 1 = 最低有效位 → 最高位因子在最左；kron(A, B) 中 A 更显著
     m = factors[end]
     for i in n-1:-1:1
         m = kron(m, factors[i])

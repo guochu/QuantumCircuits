@@ -8,7 +8,7 @@
 ```julia
 H          # ::ConstGate —— 数学对象
 H(1)       # ::GateOp   —— 定位：作用在 qubit 1 上
-CX(0, 1)   # 控制比特 0，目标比特 1
+CX(1, 2)   # 控制比特 1，目标比特 2
 RX(π/2, 3) # 参数在前，比特在后（与 Qiskit 线路方法签名一致）
 RX(:θ, 3)  # Symbol 自动提升为 Param(:θ)（符号参数）
 ```
@@ -36,7 +36,7 @@ RX(:θ, 3)  # Symbol 自动提升为 Param(:θ)（符号参数）
 g  = usergate(:mygate, [0 1; 1 0])   # 矩阵定义（等价 UserGate(:mygate, ...))
 g(3)                                  # ⇒ GateOp(g, [3])
 
-def = Circuit([H(0), CX(0, 1)])
+def = Circuit([H(1), CX(1, 2)])
 bell = UserGate(:bell, 2, def)        # 子线路定义（必须全酉），mat 惰性合成
 mat(bell)
 ```

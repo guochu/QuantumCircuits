@@ -8,7 +8,7 @@
 ```julia
 c = Circuit(4)                      # 4 比特；默认带 QReg(:q,4) 与 CReg(:c,4)
 c = Circuit(3, cregs=[CReg(:syn, 2)])          # 自定义经典寄存器
-c = Circuit([H(0), CX(0, 1)])       # 由操作序列构造（自动推断比特数）
+c = Circuit([H(1), CX(1, 2)])       # 由操作序列构造（自动推断比特数）
 ```
 
 字段：`ops`（操作向量）、`n`（比特数，`nqubits(c)`）、`qregs`、`cregs`、`layout`。
@@ -31,9 +31,9 @@ c = Circuit([H(0), CX(0, 1)])       # 由操作序列构造（自动推断比特
 门参数位可填 `Real | Param | Symbol`（`Symbol` 自动提升）：
 
 ```julia
-push!(c, RX(:θ, 0))       # 权重共享：同名参数是同一个 Param
+push!(c, RX(:θ, 1))       # 权重共享：同名参数是同一个 Param
 φ = params(:φ, 3)         # 参数向量；φ[i] ⇒ Param(Symbol("φ[i]"))
-push!(c, RZZ(φ[1], 0, 1))
+push!(c, RZZ(φ[1], 1, 2))
 ```
 
 ```julia
@@ -83,8 +83,8 @@ c.layout = Layout([5, 7, 9], nothing)   # initial: 线路比特 → 设备比特
 ## 7. 显示
 
 ```julia
-julia> c
-Circuit(n=2, ops=2)
-  1: H q[0]
-  2: CX q[0], q[1]
+julia> print(draw(c))
+q1: ─H──●─
+     │
+q2: ────X─
 ```

@@ -39,7 +39,8 @@ struct GateOp <: Operation
     function GateOp(gate::Gate, qubits::Vector{Int}, params::Vector)
         length(qubits) == nqubits(gate) ||
             throw(ArgumentError("$(name(gate)) acts on $(nqubits(gate)) qubits, got $(length(qubits))"))
-        new(gate, qubits, GateParam[p isa Param ? p : Float64(p) for p in params])
+        # convert（而非推导式）对自动微分友好
+        new(gate, qubits, convert(Vector{GateParam}, params))
     end
 end
 
@@ -76,27 +77,19 @@ _param_value(p::Param, table::AbstractDict) =
 parameters(op::GateOp) = Param[p for p in op.params if p isa Param]
 
 # ── 门调用即定位（统一处理：参数…, 比特…） ───────────────────────────────────
+_param_of_gate(a::Symbol, g::Gate) = Param(a)
+_param_of_gate(a::Param, g::Gate) = a
+_param_of_gate(a::Real, g::Gate) = Float64(a)
+_param_of_gate(a, g::Gate) =
+    throw(ArgumentError("invalid parameter type $(typeof(a)) for $(name(g))"))
+
 function (g::Gate)(args::Union{Real,Param,Symbol,Integer}...)
     np, nq = num_params(g), nqubits(g)
     length(args) == np + nq ||
         throw(ArgumentError("$(name(g)) expects $np parameter(s) and $nq qubit(s), got $(length(args)) arguments"))
-    ps = GateParam[]
-    for a in args[1:np]
-        if a isa Symbol
-            push!(ps, Param(a))
-        elseif a isa Param
-            push!(ps, a)
-        elseif a isa Real
-            push!(ps, Float64(a))
-        else
-            throw(ArgumentError("invalid parameter type $(typeof(a)) for $(name(g))"))
-        end
-    end
-    qs = Int[]
-    for a in args[np+1:end]
-        a isa Integer || throw(ArgumentError("qubit arguments must be integers, got $a"))
-        push!(qs, Int(a))
-    end
+    # 无 push!/setindex!/推导式的构造（对自动微分友好）
+    ps = Base.vect(map(a -> _param_of_gate(a, g), args[1:np])...)
+    qs = Base.vect(map(a -> Int(a), args[np+1:end])...)
     GateOp(g, qs, ps)
 end
 
@@ -135,7 +128,7 @@ end
 """
     reinit(q)
 
-构造把量子比特 `q`（0-based）重置到 |0⟩ 的 `ReinitOp`。
+构造把量子比特 `q`（1-based）重置到 |0⟩ 的 `ReinitOp`。
 """
 reinit(q::Integer) = ReinitOp([Int(q)])
 
