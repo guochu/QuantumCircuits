@@ -140,6 +140,8 @@ function _qasm3_op!(io::IO, op::Operation, qoff, coff)
             println(io, ";")
         end
     elseif op isa IfOp
+        op.cond.bit === nothing ||
+            throw(ArgumentError("per-bit if conditions ($(op.cond)) are not supported by this QASM 3 subset; compare the whole register"))
         print(io, "if (", op.cond.reg.name, " ", _cond_symbol(op.cond.op), " ", op.cond.value, ") {\n")
         for o in op.then.ops
             print(io, "  ")

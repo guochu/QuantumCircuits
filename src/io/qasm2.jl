@@ -150,6 +150,8 @@ function _qasm2_op!(io::IO, op::Operation, qoff, coff)
             println(io)
         end
     elseif op isa IfOp
+        op.cond.bit === nothing ||
+            throw(ArgumentError("OpenQASM 2 if compares a whole register; per-bit conditions ($(op.cond)) are not exportable"))
         op.otherwise === nothing ||
             throw(ArgumentError("OpenQASM 2 has no else branch; use to_qasm(c; version=3)"))
         length(op.then.ops) == 1 ||

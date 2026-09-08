@@ -60,6 +60,11 @@
     c8 = Circuit(1)
     push!(c8, RX(:θ, 1))
     @test_throws ArgumentError to_qasm(c8; version=2)
+    # 按位条件不可导出（QASM if 只支持整寄存器比较）
+    cbit = Circuit(2)
+    if_then(cbit, cbit.cregs[1][1] == 1, Circuit([X(1)]))
+    @test_throws ArgumentError to_qasm(cbit; version=2)
+    @test_throws ArgumentError to_qasm(cbit; version=3)
 end
 
 @testset "qasm3 roundtrip" begin
@@ -105,7 +110,7 @@ end
     round_i = Circuit(5; cregs=[CReg(:syn, 2)])
     push!(round_i, CX(1, 5))
     push!(round_i, CX(3, 5))
-    if_then(round_i, round_i.cregs[1][1] == 1, Circuit([X(1)]); otherwise=Circuit([Z(1)]))
+    if_then(round_i, round_i.cregs[1] == 1, Circuit([X(1)]); otherwise=Circuit([Z(1)]))
     s7 = to_qasm(round_i; version=3)
     @test occursin("if (syn == 1) {", s7)
     @test occursin("else {", s7)

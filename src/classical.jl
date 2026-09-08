@@ -5,16 +5,27 @@
 # v1 只做寄存器比较 + IfOp；while/for 留给 v2（类型层次开放，不破坏兼容）。
 # =============================================================================
 
-"""最小条件：寄存器值与整数的比较，`op ∈ (:(==), :(≠), :(≥), :(≤))`。"""
+"""最小条件：寄存器值（或单个经典位）与整数的比较，
+`op ∈ (:(==), :(≠), :(≥), :(≤))`。`bit = nothing` 比较整寄存器值；
+`bit = i` 只比较第 `i` 位。"""
 struct Cond
     reg::CReg
     op::Symbol
     value::Int
+    bit::Union{Nothing,Int}
+
+    Cond(reg::CReg, op::Symbol, value::Int) = new(reg, op, value, nothing)
+    Cond(reg::CReg, op::Symbol, value::Int, bit::Union{Nothing,Int}) =
+        new(reg, op, value, bit)
 end
 
-Base.show(io::IO, c::Cond) = print(io, c.reg.name, " ", c.op, " ", c.value)
+function Base.show(io::IO, c::Cond)
+    c.bit === nothing ?
+    print(io, c.reg.name, " ", c.op, " ", c.value) :
+    print(io, c.reg.name, "[", c.bit, "] ", c.op, " ", c.value)
+end
 
-# 语法糖：c == 3、c ≠ 3、c ≥ 3、c ≤ 3；单个经典位 c[0] == 1 同样得到 Cond。
+# 语法糖：c == 3、c ≠ 3、c ≥ 3、c ≤ 3；单个经典位 c[i] == 1 得到按位比较的 Cond。
 # 注意：这使 CReg/ClbitRef 与 Int 的 `==` 返回 Cond 而非 Bool（有意为之）。
 Base.:(==)(r::CReg, v::Integer) = Cond(r, :(==), Int(v))
 Base.:(==)(v::Integer, r::CReg) = Cond(r, :(==), Int(v))
@@ -22,9 +33,9 @@ Base.:(≠)(r::CReg, v::Integer) = Cond(r, :≠, Int(v))
 Base.:(≠)(v::Integer, r::CReg) = Cond(r, :≠, Int(v))
 Base.:(≥)(r::CReg, v::Integer) = Cond(r, :≥, Int(v))
 Base.:(≤)(r::CReg, v::Integer) = Cond(r, :≤, Int(v))
-Base.:(==)(c::ClbitRef, v::Integer) = Cond(c.reg, :(==), Int(v))
-Base.:(==)(v::Integer, c::ClbitRef) = Cond(c.reg, :(==), Int(v))
-Base.:(≠)(c::ClbitRef, v::Integer) = Cond(c.reg, :≠, Int(v))
+Base.:(==)(c::ClbitRef, v::Integer) = Cond(c.reg, :(==), Int(v), c.index)
+Base.:(==)(v::Integer, c::ClbitRef) = Cond(c.reg, :(==), Int(v), c.index)
+Base.:(≠)(c::ClbitRef, v::Integer) = Cond(c.reg, :≠, Int(v), c.index)
 
 """经典条件分支操作（then / else 子线路）。"""
 struct IfOp <: Operation
@@ -40,7 +51,14 @@ function qubits(op::IfOp)
 end
 
 function clbits(op::IfOp)
-    out = ClbitRef[ClbitRef(op.cond.reg, i) for i in 1:length(op.cond.reg)]
+    out = ClbitRef[]
+    if op.cond.bit === nothing
+        # 整寄存器条件：条件寄存器全部位都参与依赖
+        append!(out, ClbitRef(op.cond.reg, i) for i in 1:length(op.cond.reg))
+    else
+        # 按位条件：只依赖被比较的那一位
+        push!(out, ClbitRef(op.cond.reg, op.cond.bit))
+    end
     append!(out, clbits_used(op.then))
     op.otherwise === nothing || append!(out, clbits_used(op.otherwise))
     return unique(out)

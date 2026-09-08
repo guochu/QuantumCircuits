@@ -40,14 +40,18 @@
     c6 = Circuit(2)
     if_then(c6, c6.cregs[1][1] == 1, Circuit([X(1)]))
     s6 = draw(c6)
-    @test occursin("if (c == 1)", s6)
+    @test occursin("if (c[1] == 1)", s6)
     @test occursin("IF", s6)
-    # BlockOp：draw 会先展开（unroll）再绘制，body 重复 3 次
+    # BlockOp：draw 默认展开（unroll）再绘制，body 重复 3 次
     c7 = Circuit(4)
     push!(c7, block(Circuit([H(1), CX(1, 2)]); name=:round, repeat=3))
     s7 = draw(c7)
     @test count("─H─", s7) == 3
     @test count("─X─", s7) == 3
+    # BlockOp：unroll = false 时画成单个命名盒（重复块标注 ×n）
+    f7 = draw(c7; unroll=false)
+    @test occursin("round ×3", f7)
+    @test !occursin("─H─", f7)
     # io 方法
     io = IOBuffer()
     draw(io, c2)

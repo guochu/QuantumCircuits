@@ -9,7 +9,8 @@
 #     q[2]: ──X──[H]─
 #
 # 布局模型：每个操作占一列（`_DrawColumn`），列内记录各线上的符号（`_DrawCell`）
-# 与连线跨度 [lo, hi]；`_layout` 先 `unroll!` 展开 BlockOp，再逐操作建列。
+# 与连线跨度 [lo, hi]；`_layout` 默认先 `unroll!` 展开 BlockOp 再逐操作建列，
+# `unroll = false` 时把每个块画成单个命名盒。
 # Luxor 图形后端（包扩展）复用同一布局。
 # =============================================================================
 
@@ -149,7 +150,8 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
         for q in qubits(op)
             _setcell!(col, q, :box, "IF")
         end
-        for i in 1:length(op.cond.reg)
+        cond_bits = op.cond.bit === nothing ? (1:length(op.cond.reg)) : (op.cond.bit:op.cond.bit)
+        for i in cond_bits
             _touch!(col, nq + coff[op.cond.reg.name] + i)
         end
         push!(cols, col)
@@ -178,11 +180,11 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
     return cols
 end
 
-function _layout(c::Circuit)
+function _layout(c::Circuit; unroll::Bool=true)
     nq, coff, ncl = _wire_maps(c)
     cols = _DrawColumn[]
     tmp = copy(c)
-    unroll!(tmp)
+    unroll && unroll!(tmp)
     for op in tmp.ops
         _push_op!(cols, op, nq, coff)
     end
@@ -197,6 +199,10 @@ end
 把线路渲染为文本图。默认使用 Unicode 符号（`● ● ✕ ░` 等）；
 `ascii = true` 时使用纯 ASCII 符号。
 
+默认 `unroll = true`：先把 `BlockOp` 展开为平面门序列再绘制；
+`unroll = false` 时把每个块画成单个命名盒（重复块标注 `×n`），
+顶层结构一目了然。
+
 ```julia
 julia> c = Circuit(2)
 julia> push!(c, H(1))
@@ -207,8 +213,8 @@ q[1]: ─H──●─
 q[2]: ────X─
 ```
 """
-function draw(c::Circuit; ascii::Bool=false)
-    cols, nq, coff, ncl = _layout(c)
+function draw(c::Circuit; ascii::Bool=false, unroll::Bool=true)
+    cols, nq, coff, ncl = _layout(c; unroll=unroll)
     uni = !ascii
     FQ = uni ? "─" : "-"
     FC = uni ? "═" : "="
@@ -289,10 +295,11 @@ function draw(c::Circuit; ascii::Bool=false)
 end
 
 """
-    draw(io::IO, c::Circuit; ascii::Bool=false)
+    draw(io::IO, c::Circuit; ascii::Bool=false, unroll::Bool=true)
 
 把文本图写入 `io`。
 """
-draw(io::IO, c::Circuit; ascii::Bool=false) = print(io, draw(c; ascii=ascii))
+draw(io::IO, c::Circuit; ascii::Bool=false, unroll::Bool=true) =
+    print(io, draw(c; ascii=ascii, unroll=unroll))
 
 Base.show(io::IO, ::MIME"text/plain", c::Circuit) = print(io, draw(c))
