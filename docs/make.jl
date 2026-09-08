@@ -22,6 +22,7 @@ makedocs(;
         "复合结构" => "composite.md",
         "噪声信道" => "channels.md",
         "Hamiltonian" => "hamiltonian.md",
+        "Interface" => "interface.md",
         "QASM 序列化" => "io.md",
         "扩展协议" => "extending.md",
         "API 参考" => "api.md",

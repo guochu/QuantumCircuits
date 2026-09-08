@@ -1,19 +1,9 @@
 # =============================================================================
-# hamiltonian.jl — 子模块 QuantumCircuits.Hamiltonian：Pauli 代数
+# paulihamiltonian.jl — Pauli 代数（PauliTerm / PauliSum）
 #
-# 用法：`using QuantumCircuits.Hamiltonian`
-# 系数类型参数化：实数/复数均可（整数系数自动提升为 Float64）。
-# 注意：`expectation` 由模拟器后端实现，本包不实现。
+# 本文件在 `module Hamiltonian` 内被 hamiltonians.jl include，
+# 不自带模块包装。
 # =============================================================================
-
-module Hamiltonian
-
-using LinearAlgebra
-
-export PauliTerm, PauliSum
-
-# 与主模块共享同一个 mat 函数（mat(::PauliSum, n) 在下方扩展）
-import QuantumCircuits: mat
 
 "Pauli 单比特符号集合：`:I, :X, :Y, :Z`。"
 const PAULIS = (:I, :X, :Y, :Z)
@@ -35,29 +25,25 @@ const _PAULI_MUL = Dict{Tuple{Symbol,Symbol},Tuple{Symbol,ComplexF64}}(
 
 _pauli_mul(a::Symbol, b::Symbol) = _PAULI_MUL[(a, b)]
 
-# 整数系数自动提升为 Float64
-_numtype(::Type{T}) where {T<:Number} = T <: Integer ? Float64 : T
-
 """
 Pauli 项：`coeff * P_{q1} ⊗ P_{q2} ⊗ …`
 
     PauliTerm(1.0, 1=>:Z, 2=>:X)
 
-类型参数 `T<:Number`（实数/复数均可；整数系数自动提升为 `Float64`）。
+`coeff` 为任意 `Number`（无类型参数；元素类型在矩阵展开等需要时动态提升）。
 构造时位置自动排序、同 qubit 项自动相乘合并（如 `X·X → I`）。
 """
-struct PauliTerm{T<:Number}
-    coeff::T
+struct PauliTerm
+    coeff::Number
     ops::Vector{Pair{Int,Symbol}}   # 按 qubit 升序；每个 qubit 至多一项；不含 :I
 end
 
-# 规范化原始构造（校验符号 + 整数提升）；避免多重 callable 构造器定义
+# 规范化原始构造（校验 Pauli 符号）；避免多重 callable 构造器定义
 function _pauli_term(coeff::Number, ops::Vector{Pair{Int,Symbol}})
     for (_, s) in ops
         s in PAULIS || throw(ArgumentError("invalid Pauli symbol $s"))
     end
-    T = _numtype(typeof(coeff))
-    return PauliTerm{T}(T(coeff), ops)
+    return PauliTerm(coeff, ops)
 end
 
 function PauliTerm(coeff::Number, pairs::Pair{Int,Symbol}...)
@@ -83,50 +69,39 @@ end
 PauliTerm(pairs::Pair{Int,Symbol}...) = PauliTerm(1.0, pairs...)
 
 """
-厄米算符 = Pauli 项之和；`+` 自动合并同类项、去掉零系数项，系数类型按需提升。
+厄米算符 = Pauli 项之和；`+` 自动合并同类项、去掉零系数项。
 
     PauliSum([PauliTerm(1.0, 1=>:Z), PauliTerm(0.5, 2=>:X)])
 """
-struct PauliSum{T<:Number}
-    terms::Vector{PauliTerm{T}}
+struct PauliSum
+    terms::Vector{PauliTerm}
 end
 
-PauliSum() = PauliSum(Vector{PauliTerm{Float64}}())
-PauliSum(t::PauliTerm{T}) where {T} = PauliSum{T}([t])
-
-function PauliSum(ts::PauliTerm...)
-    T = Float64
-    for t in ts
-        T = promote_type(T, typeof(t.coeff))
-    end
-    return PauliSum{T}(PauliTerm{T}[PauliTerm(T(t.coeff), t.ops) for t in ts])
-end
-
-PauliSum(ts::Vector{<:PauliTerm}) = PauliSum(ts...)
+PauliSum() = PauliSum(PauliTerm[])
+PauliSum(t::PauliTerm) = PauliSum([t])
+PauliSum(ts::PauliTerm...) = PauliSum(collect(PauliTerm, ts))
+PauliSum(ts::Vector{<:PauliTerm}) = PauliSum(convert(Vector{PauliTerm}, ts))
 
 function _merge_terms(ts)
     isempty(ts) && return PauliSum()
-    T = Float64
-    for t in ts
-        T = promote_type(T, typeof(t.coeff))
-    end
-    coeffs = Dict{Tuple{Vararg{Pair{Int,Symbol}}},T}()
-    order = Tuple{Vararg{Pair{Int,Symbol}}}[]
+    keys_list = Tuple{Vararg{Pair{Int,Symbol}}}[]
+    coeffs = Number[]
     for t in ts
         key = Tuple(t.ops)
-        if haskey(coeffs, key)
-            coeffs[key] = coeffs[key] + t.coeff
+        i = findfirst(==(key), keys_list)
+        if i === nothing
+            push!(keys_list, key)
+            push!(coeffs, t.coeff)
         else
-            coeffs[key] = t.coeff
-            push!(order, key)
+            coeffs[i] = coeffs[i] + t.coeff
         end
     end
-    terms = PauliTerm{T}[]
-    for key in order
-        c = coeffs[key]
-        iszero(c) || push!(terms, PauliTerm{T}(c, collect(Pair{Int,Symbol}, key)))
+    terms = PauliTerm[]
+    for (i, key) in enumerate(keys_list)
+        c = coeffs[i]
+        iszero(c) || push!(terms, _pauli_term(c, collect(Pair{Int,Symbol}, key)))
     end
-    return PauliSum{T}(terms)
+    return PauliSum(terms)
 end
 
 Base.:+(a::PauliTerm, b::PauliTerm) = _merge_terms([a, b])
@@ -179,10 +154,17 @@ end
 
 """
 展开为 `n` 比特空间的 `2^n × 2^n` **稠密**矩阵（小端序：qubit 1 = 最低有效位）。
-结果元素类型随系数与 Pauli 串自然提升（全实项 ⇒ 实矩阵）。
+结果元素类型按各项系数与 Pauli 串动态提升（全实项 ⇒ 实矩阵）。
 """
-function mat(h::PauliSum{T}, n::Int) where {T}
+function mat(h::PauliSum, n::Int)
     d = 1 << n
+    T = Float64
+    for t in h.terms
+        T = promote_type(T, typeof(t.coeff))
+        for (_, s) in t.ops
+            T = promote_type(T, eltype(_P[s]))
+        end
+    end
     M = zeros(T, d, d)
     for t in h.terms
         M = M + mat(t, n)   # mat(t, n) 已含系数 t.coeff
@@ -220,5 +202,3 @@ function Base.show(io::IO, t::PauliTerm)
 end
 
 Base.show(io::IO, s::PauliSum) = join(io, [string(t) for t in s.terms], " + ")
-
-end # module Hamiltonian

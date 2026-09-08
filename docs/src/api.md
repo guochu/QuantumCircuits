@@ -63,3 +63,9 @@ Pages = ["io/io.jl"]
 ```@autodocs
 Modules = [QuantumCircuits.Hamiltonian]
 ```
+
+## Interface 子模块（模拟后端契约）
+
+```@autodocs
+Modules = [QuantumCircuits.Interface]
+```

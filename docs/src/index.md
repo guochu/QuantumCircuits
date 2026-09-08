@@ -65,7 +65,8 @@ REPL 中直接回车显示线路即文本图，也可显式 `draw(c)`（`ascii =
 | [线路](circuits.md) | Circuit、构造 DSL、分析、参数绑定、经典控制、布局 |
 | [复合结构](composite.md) | UserGate（定义层）、BlockOp（定位层）、unroll |
 | [噪声信道](channels.md) | Kraus / Pauli / 去极化 / 阻尼 |
-| [Hamiltonian](hamiltonian.md) | 子模块：Pauli 代数 |
+| [Hamiltonian](hamiltonian.md) | 子模块：Pauli / 自旋算符代数 |
+| [Interface](interface.md) | 子模块：模拟后端契约（`Backend` / `simulate`） |
 | [QASM 序列化](io.md) | OpenQASM 2 / 3 |
 | [扩展协议](extending.md) | 下游扩展（自定义 Operation） |
 | [API 参考](api.md) | 由源码 docstring 自动生成 |

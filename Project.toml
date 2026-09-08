@@ -15,7 +15,8 @@ QuantumCircuitsLuxorExt = "Luxor"
 [extras]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+Random = "9a962f9c-6df0-11e9-0e5d-c546b8b9ee8a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "LinearAlgebra", "Luxor"]
+test = ["Test", "LinearAlgebra", "Luxor", "Random"]

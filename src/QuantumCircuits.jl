@@ -19,7 +19,8 @@ QCCD 编译产物，共用这一种表示。
 8. **参数用符号**：门参数接受 `Real | Param | Symbol`，变分工作流先建线路后绑参。
 
 模块结构：`bits` / `params` / `gates` / `modifiers` / `ops` / `channels` /
-`classical` / `circuit` / `composite` / `dag` / `Hamiltonian`（子模块）/ `io`。
+`classical` / `circuit` / `composite` / `dag` / `Hamiltonian`（子模块：Pauli 代数）/
+`Interface`（子模块：模拟后端契约）/ `io`。
 """
 module QuantumCircuits
 
@@ -57,6 +58,12 @@ export Circuit, Layout,
        CircuitDAG, nodes, dependencies
 # `push!` / `append!` / `<<` 是对 Base 函数的扩展，Base 已导出，直接可用，无需重复导出。
 
+# ── 模拟后端契约（Interface 子模块，重导出） ──
+export Backend, SimResult, simulate, simulate!, expectation,
+       supports, max_qubits,
+       set_default_backend!, default_backend, clear_default_backend!,
+       counts_key
+
 # ── IO ──
 export to_qasm, write_qasm, read_qasm
 
@@ -77,9 +84,16 @@ include("classical.jl")    # Cond + IfOp + if_then
 include("composite.jl")    # UserGate + BlockOp + unroll + 矩阵嵌入
 include("draw.jl")         # 线路文本图（draw）
 include("dag.jl")          # 依赖 DAG
-include("hamiltonian.jl")  # 子模块 Hamiltonian
+include("hamiltonians/hamiltonians.jl")  # 子模块 Hamiltonian：Pauli / 自旋算符代数
+include("interface.jl")    # 子模块 Interface：模拟后端契约（Backend / simulate / SimResult）
 include("io/io.jl")        # to_qasm / write_qasm / read_qasm + 共享工具
 include("io/qasm2.jl")     # QASM2 读写 + 统一解析器
 include("io/qasm3.jl")     # QASM3 读写
+
+# 重导出 Interface 契约（算法包 `using QuantumCircuits` 即可直接使用）
+using .Interface: Backend, SimResult, simulate, expectation,
+       supports, max_qubits,
+       set_default_backend!, default_backend, clear_default_backend!,
+       counts_key
 
 end # module
