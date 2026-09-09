@@ -41,7 +41,7 @@ Pages = ["draw.jl"]
 
 ```@autodocs
 Modules = [QuantumCircuits]
-Pages = ["circuit.jl", "classical.jl"]
+Pages = ["circuit.jl", "classical.jl", "variational.jl"]
 ```
 
 ## 复合结构与依赖 DAG

@@ -19,8 +19,8 @@ QCCD 编译产物，共用这一种表示。
 8. **参数用符号**：门参数接受 `Real | Param | Symbol`，变分工作流先建线路后绑参。
 
 模块结构：`bits` / `params` / `gates` / `modifiers` / `ops` / `channels` /
-`classical` / `circuit` / `composite` / `dag` / `Hamiltonian`（子模块：Pauli 代数）/
-`Interface`（子模块：模拟后端契约）/ `io`。
+`classical` / `circuit` / `variational`（参数化线路示例）/ `composite` / `dag` /
+`Hamiltonian`（子模块：Pauli 代数）/ `Interface`（子模块：模拟后端契约）/ `io`。
 """
 module QuantumCircuits
 
@@ -55,7 +55,8 @@ export Cond, if_then
 export Circuit, Layout,
        Param, ParamVector, params, parameters, dagger,
        depth, num_ops, count_ops, qubits_used, validate, dag,
-       CircuitDAG, nodes, dependencies
+       CircuitDAG, nodes, dependencies,
+        variational_circuit_1d, real_variational_circuit_1d
 # `push!` / `append!` / `<<` 是对 Base 函数的扩展，Base 已导出，直接可用，无需重复导出。
 
 # ── 模拟后端契约（Interface 子模块，重导出） ──
@@ -80,6 +81,7 @@ include("channels.jl")     # 信道类型 + kraus + 噪声指令构造
 include("ops.jl")          # Operation + GateOp/MeasOp/ReinitOp/BarrierOp/ChannelOp
 include("modifiers.jl")    # inv / pow / ctrl / negctrl
 include("circuit.jl")      # Circuit + DSL + 分析 + 绑参
+include("variational.jl")  # 参数化线路示例（变分 ansatz）
 include("classical.jl")    # Cond + IfOp + if_then
 include("composite.jl")    # UserGate + BlockOp + unroll + 矩阵嵌入
 include("draw.jl")         # 线路文本图（draw）
