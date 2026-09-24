@@ -104,13 +104,16 @@ end
 
 # ── 受控构造辅助 ──────────────────────────────────────────────────────────────
 # 控制比特为门矩阵的最高位（与 qubit 列表中控制比特在前一致）。
+# 用 hcat/vcat 的函数式拼块（而非 zeros + 原地写入），保证对 Zygote 可微——
+# 受控含参门（CRX/_CRY/_CU3/_CU 等）的 matrix_fn 依赖此函数做 AD 传导。
 function _controlled(u::AbstractMatrix)
     k = size(u, 1)
     size(u, 2) == k || throw(ArgumentError("matrix must be square"))
     T = promote_type(eltype(u), Float64)
-    m = Matrix{T}(I, 2k, 2k)
-    m[k+1:end, k+1:end] .= u
-    return m
+    O = zeros(T, k, k)
+    I2 = Matrix{T}(I, k, k)
+    u2 = eltype(u) === T ? u : convert(Matrix{T}, u)
+    return vcat(hcat(I2, O), hcat(O, u2))
 end
 
 # ── 门库 ──────────────────────────────────────────────────────────────────────
