@@ -201,7 +201,7 @@ end
 
 _op_kind(op::GateOp) = name(op.gate)
 _op_kind(::MeasOp) = :measure
-_op_kind(::ReinitOp) = :reset
+_op_kind(::ResetOp) = :reset
 _op_kind(::BarrierOp) = :barrier
 _op_kind(::ChannelOp) = :channel
 # IfOp / BlockOp 的分类方法见 classical.jl / composite.jl

@@ -125,7 +125,7 @@ function _push_op!(cols::Vector{_DrawColumn}, op::Operation, nq::Int, coff::Dict
         push!(cols, _gate_column(op))
     elseif op isa MeasOp
         push!(cols, _measure_column(op, nq, coff))
-    elseif op isa ReinitOp
+    elseif op isa ResetOp
         col = _DrawColumn()
         for q in op.qubits
             _setcell!(col, q, :box, "|0>")

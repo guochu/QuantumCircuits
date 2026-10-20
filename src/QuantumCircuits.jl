@@ -40,8 +40,8 @@ export Gate, ConstGate, ParamGate, UserGate,
 export pow, ctrl, negctrl            # inv 直接扩展 Base.inv，无需再导出
 
 # ── 操作 ──
-export Operation, GateOp, MeasOp, ReinitOp, BarrierOp, ChannelOp, IfOp, BlockOp,
-       measure, measure_all!, barrier, block, reinit,
+export Operation, GateOp, MeasOp, ResetOp, BarrierOp, ChannelOp, IfOp, BlockOp,
+       measure, measure_all!, barrier, block, reset,
        unroll, unroll!, assign, assign!, draw
 
 # ── 信道 ──
@@ -78,7 +78,7 @@ include("bits.jl")
 include("params.jl")
 include("gates.jl")        # Gate 抽象 + 门库单例
 include("channels.jl")     # 信道类型 + kraus + 噪声指令构造
-include("ops.jl")          # Operation + GateOp/MeasOp/ReinitOp/BarrierOp/ChannelOp
+include("ops.jl")          # Operation + GateOp/MeasOp/ResetOp/BarrierOp/ChannelOp
 include("modifiers.jl")    # inv / pow / ctrl / negctrl
 include("circuit.jl")      # Circuit + DSL + 分析 + 绑参
 include("variational.jl")  # 参数化线路示例（变分 ansatz）

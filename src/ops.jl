@@ -121,19 +121,20 @@ clbits(op::MeasOp) = op.clbits
 Base.:(==)(a::MeasOp, b::MeasOp) = a.qubits == b.qubits && a.clbits == b.clbits
 
 """重置到 |0⟩。"""
-struct ReinitOp <: Operation
+struct ResetOp <: Operation
     qubits::Vector{Int}
 end
 
 """
-    reinit(q)
+    reset(q)
 
-构造把量子比特 `q`（1-based）重置到 |0⟩ 的 `ReinitOp`。
+构造把量子比特 `q`（1-based）重置到 |0⟩ 的 `ResetOp`。
+对 `Base.reset` 的重载（2026-10 由 `reinit` 更名）。
 """
-reinit(q::Integer) = ReinitOp([Int(q)])
+Base.reset(q::Integer) = ResetOp([Int(q)])
 
-qubits(op::ReinitOp) = op.qubits
-Base.:(==)(a::ReinitOp, b::ReinitOp) = a.qubits == b.qubits
+qubits(op::ResetOp) = op.qubits
+Base.:(==)(a::ResetOp, b::ResetOp) = a.qubits == b.qubits
 
 """屏障：调度/优化提示，无量子语义。"""
 struct BarrierOp <: Operation
@@ -204,6 +205,6 @@ function Base.show(io::IO, op::MeasOp)
     join(io, ["q[$q]→$(c.reg.name)[$(c.index-1)]" for (q, c) in zip(op.qubits, op.clbits)], ", ")
 end
 
-Base.show(io::IO, op::ReinitOp) = (print(io, "reset "); join(io, ["q[$q]" for q in op.qubits], ", "))
+Base.show(io::IO, op::ResetOp) = (print(io, "reset "); join(io, ["q[$q]" for q in op.qubits], ", "))
 Base.show(io::IO, op::BarrierOp) = (print(io, "barrier "); join(io, ["q[$q]" for q in op.qubits], ", "))
 Base.show(io::IO, op::ChannelOp) = (print(io, "channel(", length(kraus(op.channel)), " ops) "); join(io, ["q[$q]" for q in op.qubits], ", "))

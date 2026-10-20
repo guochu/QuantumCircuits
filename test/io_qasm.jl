@@ -120,8 +120,8 @@ end
     # barrier / reset
     c9 = Circuit(2)
     push!(c9, barrier(1, 2))
-    push!(c9, reinit(1))
+    push!(c9, reset(1))
     c10 = read_qasm(to_qasm(c9; version=3))
     @test c10.ops[1] == BarrierOp([1, 2])
-    @test c10.ops[2] == ReinitOp([1])
+    @test c10.ops[2] == ResetOp([1])
 end

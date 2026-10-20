@@ -20,7 +20,7 @@
     c2 = Circuit(2)
     push!(c2, RX(0.5, 1))
     push!(c2, barrier(1, 2))
-    push!(c2, reinit(2))
+    push!(c2, reset(2))
     s3 = draw(c2)
     @test occursin("RX(0.5)", s3)
     @test occursin("░", s3)
