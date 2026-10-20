@@ -49,7 +49,8 @@ export Channel, KrausChannel, PauliChannel, UnitaryChannel,
        PauliError, Depolarizing, AmplitudeDamping, PhaseDamping, kraus
 
 # ── 经典控制 ──
-export Cond, if_then
+export Cond, if_then,
+       ClassicalStore, reg_value, set_clbit!, eval_cond
 
 # ── 线路 ──
 export Circuit, Layout,

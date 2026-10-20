@@ -25,6 +25,7 @@
 
 module Interface
 
+using Base: @kwdef
 using QuantumCircuits: Circuit, CReg, ClbitRef
 using ..Hamiltonian: PauliSum
 
@@ -59,7 +60,7 @@ abstract type Backend end
 
 便利方法：`r["c:011"]` 取单个计数（等价 `r.counts["c:011"]`）、`haskey(r, key)`。
 """
-Base.@kwdef struct SimResult
+@kwdef struct SimResult
     counts::Union{Nothing,Dict{String,Int}} = nothing
     state::Any = nothing
     metadata::Dict{Symbol,Any} = Dict{Symbol,Any}()
@@ -117,7 +118,10 @@ end
 """
     simulate!(c::Circuit, state; params = nothing) -> state
 
-`simulate` 的就地版本：把线路演化作用到给定态上。
+`simulate` 的就地版本：把线路演化作用到给定态上。**输出统一约定**：
+`simulate` 与 `simulate!` 都返回演化后的态（同类型），区别仅在于
+是否就地修改输入；测量结果一律写入经典寄存器运行时
+（`ClassicalStore`），不从返回值携带。
 泛型由本模块声明；基于态的方法由各模拟器扩展提供
 （如 VQC 的扩展；**不属于** `Backend` 契约的一部分）。
 """
